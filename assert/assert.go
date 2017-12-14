@@ -6,7 +6,7 @@ package assert
 import (
 	"fmt"
 
-	"github.com/google/go-cmp/cmp"
+	"github.com/gotestyourself/gotestyourself/assert/cmp"
 	"github.com/gotestyourself/gotestyourself/internal/format"
 	"github.com/gotestyourself/gotestyourself/internal/source"
 )
@@ -44,6 +44,8 @@ type Tester struct {
 // stackIndex = Assert()/Check(), assert()
 const stackIndex = 2
 
+const failureMessage = "assertion failed: "
+
 // New returns a new Tester for asserting and checking values
 func New(t TestingT) Tester {
 	return Tester{t: t, stackIndex: stackIndex, argPos: 0}
@@ -68,7 +70,7 @@ func (t Tester) assert(failer func(), comparison BoolOrComparison, msgAndArgs ..
 			t.t.Log(err.Error())
 		}
 
-		t.t.Log(format.WithCustomMessage(source, msgAndArgs...))
+		t.t.Log(format.WithCustomMessage(failureMessage+source, msgAndArgs...))
 		failer()
 		return false
 
@@ -84,6 +86,16 @@ func (t Tester) assert(failer func(), comparison BoolOrComparison, msgAndArgs ..
 	default:
 		panic(fmt.Sprintf("invalid type for condition arg: %T", comparison))
 	}
+}
+
+func runCompareFunc(failer func(), t TestingT, f CompareFunc, msgAndArgs ...interface{}) bool {
+	t.Helper()
+	if success, message := f(); !success {
+		t.Log(format.WithCustomMessage(failureMessage+message, msgAndArgs...))
+		failer()
+		return false
+	}
+	return true
 }
 
 // Check performs a comparison and marks the test as having failed if the comparison
@@ -110,14 +122,10 @@ func (t Tester) NoError(args ...interface{}) {
 	}
 }
 
-func runCompareFunc(failer func(), t TestingT, f CompareFunc, msgAndArgs ...interface{}) bool {
-	t.Helper()
-	if success, message := f(); !success {
-		t.Log(format.WithCustomMessage(message, msgAndArgs...))
-		failer()
-		return false
-	}
-	return true
+// Equal uses the == operator to assert two values are the equal
+func (t Tester) Equal(x, y interface{}, msgAndArgs ...interface{}) {
+	t.t.Helper()
+	t.assert(t.t.FailNow, cmp.Equal(x, y), msgAndArgs...)
 }
 
 // Assert fails the test immediate if comparison is not a success
@@ -126,10 +134,23 @@ func Assert(t TestingT, comparison BoolOrComparison, msgAndArgs ...interface{}) 
 	newPackageScopeTester(t).Assert(comparison, msgAndArgs...)
 }
 
+// Check performs a comparison and marks the test as having failed if the comparison
+// returns false. Returns the result of the comparison.
+func Check(t TestingT, comparison BoolOrComparison, msgAndArgs ...interface{}) bool {
+	t.Helper()
+	return newPackageScopeTester(t).Check(comparison, msgAndArgs...)
+}
+
 // NoError fails the test immediately if the last arg is a non-nil error
 func NoError(t TestingT, args ...interface{}) {
 	t.Helper()
 	newPackageScopeTester(t).NoError(args...)
+}
+
+// Equal uses the == operator to assert two values are the equal
+func Equal(t TestingT, x, y interface{}, msgAndArgs ...interface{}) {
+	t.Helper()
+	newPackageScopeTester(t).Equal(x, y, msgAndArgs...)
 }
 
 // newPackageScopeTester returns a Tester appropriate for package level functions.
@@ -137,14 +158,4 @@ func NoError(t TestingT, args ...interface{}) {
 // argPos 1 because package level functions accept testing.T as the first argument
 func newPackageScopeTester(t TestingT) Tester {
 	return Tester{t: t, stackIndex: stackIndex + 1, argPos: 1}
-}
-
-// Compare two complex values using github.com/google/go-cmp/cmp and
-// succeeds if the values are equal
-func Compare(x, y interface{}, opts ...cmp.Option) CompareFunc {
-	return func() (bool, string) {
-		diff := cmp.Diff(x, y, opts...)
-		// TODO: wrap error message?
-		return diff == "", diff
-	}
 }
