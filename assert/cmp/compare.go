@@ -163,3 +163,14 @@ func ErrorContains(err error, substring string) func() (bool, string) {
 		return true, ""
 	}
 }
+
+// EqualFloat succeeds if the two values are within epsilon precision of the expected value
+func EqualFloat(x, y float64) func() (bool, string) {
+	const epsilon = 1e-6
+	return func() (bool, string) {
+		if (x-y) < epsilon && (y-x) < epsilon {
+			return true, ""
+		}
+		return false, fmt.Sprintf("%v != %v", x, y)
+	}
+}

@@ -218,6 +218,14 @@ func TestErrorContains(t *testing.T) {
 	assertSuccess(t, success, message)
 }
 
+func TestEqualFloat(t *testing.T) {
+	success, message := EqualFloat(0.1, 0.1)()
+	assertSuccess(t, success, message)
+
+	success, message = EqualFloat(0.1, 0.100001)()
+	assertFailure(t, success, message, "0.1 != 0.100001")
+}
+
 type testingT interface {
 	Errorf(msg string, args ...interface{})
 }
