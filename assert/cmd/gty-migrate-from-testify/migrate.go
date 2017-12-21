@@ -51,7 +51,6 @@ func updateImports(migration migration) {
 	if migration.importNames.cmp != path.Base(pkgCmp) {
 		alias = migration.importNames.cmp
 	}
-	// TODO: may not be necessary in all cases
 	astutil.AddNamedImport(migration.fileset, migration.file, alias, pkgCmp)
 }
 
@@ -62,7 +61,7 @@ func replaceCalls(migration migration) func(cursor *astutil.Cursor) bool {
 			return true
 		}
 
-		if !isPackageCall(tcall, migration) {
+		if !isPackageCall(tcall) {
 			// TODO: also convert assert.New() ...
 			log.Printf("Skipping call without t %s", tcall.StringWithFileInfo())
 			return true
@@ -119,7 +118,7 @@ func (c call) String() string {
 
 func (c call) StringWithFileInfo() string {
 	return fmt.Sprintf("%s at %s:%d", c,
-		c.fileset.File(c.expr.Pos()).Name(),
+		relativePath(c.fileset.File(c.expr.Pos()).Name()),
 		c.fileset.Position(c.expr.Pos()).Line)
 }
 
@@ -134,7 +133,7 @@ func (c call) extraArgs(index int) []ast.Expr {
 	return c.expr.Args[index:]
 }
 
-func isPackageCall(tcall call, migration migration) bool {
+func isPackageCall(tcall call) bool {
 	if len(tcall.expr.Args) < 2 {
 		return false
 	}
@@ -296,11 +295,39 @@ func convertFalse(tcall call, imports importNames) ast.Node {
 			tcall.extraArgs(2)...))
 }
 
-// TODO: use Compare instead of equal if types are not primitives
 func convertEqual(tcall call, migration migration) ast.Node {
 	imports := migration.importNames
 
-	return convertTwoArgComparison(tcall, imports, "Equal")
+	cmpEquals := convertTwoArgComparison(tcall, imports, "Equal")
+	cmpCompare := convertTwoArgComparison(tcall, imports, "Compare")
+
+	switch typed := tcall.expr.Args[1].(type) {
+	case *ast.BasicLit:
+		return cmpEquals
+	case *ast.CompositeLit:
+		return cmpCompare
+	case *ast.Ident:
+		if typed.Obj == nil || typed.Obj.Decl == nil {
+			return cmpCompare
+		}
+		switch declTyped := typed.Obj.Decl.(type) {
+		case *ast.AssignStmt:
+			switch declTyped.Rhs[0].(type) {
+			case *ast.BasicLit:
+				return cmpEquals
+			case *ast.CompositeLit:
+				return cmpCompare
+			case *ast.CallExpr:
+				// TODO: share with other CallExpr branch
+			default:
+				// TODO: struct type
+			}
+		}
+	case *ast.CallExpr:
+		// TODO:
+	}
+
+	return cmpCompare
 }
 
 func convertTwoArgComparison(tcall call, imports importNames, cmpName string) ast.Node {

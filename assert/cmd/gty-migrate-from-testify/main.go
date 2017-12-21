@@ -1,42 +1,56 @@
 package main
 
 import (
+	"bytes"
 	"go/ast"
 	"go/format"
 	"go/parser"
 	"go/token"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
-	"golang.org/x/tools/go/loader"
+	"golang.org/x/tools/imports"
 )
 
 type options struct {
 	dirs   []string
 	dryRun bool
+	debug  bool
 }
 
 func main() {
-	setupLogging()
 	name := os.Args[0]
 	flags, opts := setupFlags(name)
 	handleExitError(name, flags.Parse(os.Args[1:]))
+	setupLogging(opts)
 	opts.dirs = flags.Args()
 	handleExitError(name, run(opts))
 }
 
-func setupLogging() {
+func setupLogging(opts *options) {
 	log.SetFlags(0)
+	enableDebug = opts.debug
+}
+
+var enableDebug = false
+
+func debugf(msg string, args ...interface{}) {
+	if enableDebug {
+		log.Printf("DEBUG: "+msg, args...)
+	}
 }
 
 func setupFlags(name string) (*pflag.FlagSet, *options) {
 	opts := options{}
 	flags := pflag.NewFlagSet(name, pflag.ContinueOnError)
 	flags.BoolVar(&opts.dryRun, "dry-run", false, "don't write to file")
+	flags.BoolVar(&opts.debug, "debug", false, "enable debug logging")
 	// TODO: set usage func to print more usage
 	return flags, &opts
 }
@@ -54,44 +68,60 @@ func handleExitError(name string, err error) {
 }
 
 func run(opts *options) error {
-	// TODO: use Build.UseAllFiles=true, also defualt GOROOT doesn't work on arch
-	conf := loader.Config{
-		Fset:       token.NewFileSet(),
-		ParserMode: parser.AllErrors | parser.ParseComments,
-	}
+	debugf("package count: %d", len(opts.dirs))
+
+	fileset := token.NewFileSet()
 	for _, dir := range opts.dirs {
-		conf.ImportWithTests(dir)
-	}
-	prog, err := conf.Load()
-	if err != nil {
-		return errors.Wrapf(err, "failed to load source")
-	}
-	log.Printf("DEBUG: package count: %d", len(prog.Imported))
+		pkgs, err := parser.ParseDir(fileset, dir, nil, parser.AllErrors|parser.ParseComments)
+		if err != nil {
+			return errors.Wrapf(err, "failed to parse %s", dir)
+		}
+		for _, pkg := range pkgs {
+			for _, astFile := range pkg.Files {
+				absFilename := fileset.File(astFile.Pos()).Name()
+				filename := relativePath(absFilename)
+				importNames := newImportNames(astFile.Imports)
+				if !importNames.hasTestifyImports() {
+					debugf("skipping file %s, no imports", filename)
+					continue
+				}
 
-	for _, pkginfo := range prog.Imported {
-		for _, astFile := range pkginfo.Files {
-			file := conf.Fset.File(astFile.Pos())
-			importNames := newImportNames(astFile.Imports)
-			if !importNames.hasTestifyImports() {
-				continue
-			}
+				debugf("migrating %s with imports: %#v", filename, importNames)
+				m := migration{
+					file:        astFile,
+					fileset:     fileset,
+					importNames: importNames,
+				}
+				migrateFile(m)
+				if opts.dryRun {
+					continue
+				}
 
-			m := migration{
-				file:        astFile,
-				fileset:     conf.Fset,
-				importNames: importNames,
-			}
-			migrateFile(m)
-			// TODO: maybe sort imports before write
-			if !opts.dryRun {
-				if err := writeFile(astFile, conf.Fset); err != nil {
-					return errors.Wrapf(err, "failed to write file %s", file.Name())
+				raw, err := formatFile(astFile, fileset)
+				if err != nil {
+					return errors.Wrapf(err, "failed to format %s", filename)
+				}
+
+				if err := ioutil.WriteFile(absFilename, raw, 0); err != nil {
+					return errors.Wrapf(err, "failed to write file %s", filename)
 				}
 			}
 		}
 	}
 
 	return nil
+}
+
+func relativePath(p string) string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return p
+	}
+	rel, err := filepath.Rel(cwd, p)
+	if err != nil {
+		return p
+	}
+	return rel
 }
 
 type importNames struct {
@@ -125,17 +155,15 @@ func newImportNames(imports []*ast.ImportSpec) importNames {
 		switch strings.Trim(spec.Path.Value, `"`) {
 		case pkgTestifyAssert, pkgGopkgTestifyAssert:
 			importNames.testifyAssert = identOrDefault(spec.Name, "assert")
-			continue
 		case pkgTestifyRequire, pkgGopkgTestifyRequire:
 			importNames.testifyRequire = identOrDefault(spec.Name, "require")
-			continue
-		}
-
-		if importedAs(spec, "assert") {
-			importNames.assert = "gtyassert"
-		}
-		if importedAs(spec, "cmp") {
-			importNames.cmp = "gtycmp"
+		default:
+			if importedAs(spec, "assert") {
+				importNames.assert = "gtyassert"
+			}
+			if importedAs(spec, "cmp") {
+				importNames.cmp = "gtycmp"
+			}
 		}
 	}
 	return importNames
@@ -155,12 +183,11 @@ func identOrDefault(ident *ast.Ident, def string) string {
 	return def
 }
 
-func writeFile(astFile *ast.File, fileset *token.FileSet) error {
-	file := fileset.File(astFile.Pos())
-	fh, err := os.OpenFile(file.Name(), os.O_WRONLY|os.O_TRUNC, 0)
+func formatFile(astFile *ast.File, fileset *token.FileSet) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := format.Node(buf, fileset, astFile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open %s for writing", file.Name())
+		return nil, err
 	}
-	err = format.Node(fh, fileset, astFile)
-	return errors.Wrapf(err, "failed to write source to %s", file.Name())
+	return imports.Process(fileset.File(astFile.Pos()).Name(), buf.Bytes(), nil)
 }
