@@ -172,7 +172,7 @@ func isTestingTStarExpr(objType interface{}) bool {
 		return false
 	}
 
-	return xIdent.Name == "testing" && selector.Sel.Name == "T"
+	return xIdent.Name == "testing" && (selector.Sel.Name == "T" || selector.Sel.Name == "B")
 }
 
 // isSelectorFieldTypeTestingT examines the ast.SelectorExpr and returns
@@ -250,6 +250,12 @@ func convert(tcall call, migration migration) ast.Node {
 		return convertNegativeComparison(tcall, imports, &ast.Ident{Name: "nil"}, 2)
 	case "NotEqual", "NotEqualf":
 		return convertNegativeComparison(tcall, imports, tcall.expr.Args[2], 3)
+	case "Fail", "Failf":
+		return convertFail(tcall, "Error")
+	case "FailNow", "FailNowf":
+		return convertFail(tcall, "Fatal")
+	case "NotEmpty", "NotEmptyf":
+		return convertNotEmpty(tcall, imports)
 	}
 	return nil
 }
@@ -379,4 +385,34 @@ func convertNegativeComparison(
 			tcall.testingT(),
 			&ast.BinaryExpr{X: tcall.expr.Args[1], Op: token.NEQ, Y: right},
 			tcall.extraArgs(extra)...))
+}
+
+func convertFail(tcall call, selector string) ast.Node {
+	extraArgs := tcall.extraArgs(1)
+	if len(extraArgs) > 1 {
+		selector = selector + "f"
+	}
+
+	return &ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X:   tcall.testingT(),
+			Sel: &ast.Ident{Name: selector},
+		},
+		Args: extraArgs,
+	}
+}
+
+func convertNotEmpty(tcall call, imports importNames) ast.Node {
+	lenExpr := &ast.CallExpr{
+		Fun:  &ast.Ident{Name: "len"},
+		Args: tcall.expr.Args[1:2],
+	}
+	zeroExpr := &ast.BasicLit{Kind: token.INT, Value: "0"}
+	return newCallExpr(
+		imports.assert,
+		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+		newCallExprArgs(
+			tcall.testingT(),
+			&ast.BinaryExpr{X: lenExpr, Op: token.NEQ, Y: zeroExpr},
+			tcall.extraArgs(2)...))
 }
