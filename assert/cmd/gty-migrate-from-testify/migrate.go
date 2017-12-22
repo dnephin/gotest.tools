@@ -172,7 +172,13 @@ func isTestingTStarExpr(objType interface{}) bool {
 		return false
 	}
 
-	return xIdent.Name == "testing" && (selector.Sel.Name == "T" || selector.Sel.Name == "B")
+	switch xIdent.Name {
+	case "testing":
+		return selector.Sel.Name == "T" || selector.Sel.Name == "B"
+	case "check":
+		return selector.Sel.Name == "C"
+	}
+	return false
 }
 
 // isSelectorFieldTypeTestingT examines the ast.SelectorExpr and returns
@@ -230,7 +236,7 @@ func convert(tcall call, migration migration) ast.Node {
 		return convertTrue(tcall, imports)
 	case "False", "Falsef":
 		return convertFalse(tcall, imports)
-	case "Equal", "Equalf", "Exactly", "Exactlyf":
+	case "Equal", "Equalf", "Exactly", "Exactlyf", "EqualValues", "EqualValuesf":
 		return convertEqual(tcall, migration)
 	case "Contains", "Containsf":
 		return convertTwoArgComparison(tcall, imports, "Contains")
