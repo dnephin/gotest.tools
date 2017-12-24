@@ -12,7 +12,7 @@ type mystruct struct {
 }
 
 func TestFirstThing(t *testing.T) {
-
+	rt := require.TestingT(t)
 	assert.Equal(t, "foo", "bar")
 	assert.Equal(t, 1, 2)
 	assert.True(t, false)

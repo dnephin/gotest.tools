@@ -56,6 +56,12 @@ func updateImports(migration migration) {
 
 func replaceCalls(migration migration) func(cursor *astutil.Cursor) bool {
 	return func(cursor *astutil.Cursor) bool {
+		newNode := replaceTestingT(cursor.Node(), migration.importNames)
+		if newNode != nil {
+			cursor.Replace(newNode)
+			return true
+		}
+
 		tcall, ok := isTestifyCall(cursor.Node(), migration)
 		if !ok {
 			return true
@@ -67,7 +73,7 @@ func replaceCalls(migration migration) func(cursor *astutil.Cursor) bool {
 			return true
 		}
 
-		newNode := convert(tcall, migration)
+		newNode = convert(tcall, migration)
 		if newNode == nil {
 			log.Printf("Skipping %s", tcall.StringWithFileInfo())
 			return true
@@ -75,6 +81,30 @@ func replaceCalls(migration migration) func(cursor *astutil.Cursor) bool {
 
 		cursor.Replace(newNode)
 		return true
+	}
+}
+
+func replaceTestingT(node ast.Node, names importNames) ast.Node {
+	selector, ok := node.(*ast.SelectorExpr)
+	if !ok {
+		return nil
+	}
+	xIdent, ok := selector.X.(*ast.Ident)
+	if !ok {
+		return nil
+	}
+
+	if selector.Sel.Name != "TestingT" {
+		return nil
+	}
+
+	if !names.matchesTestify(xIdent) {
+		return nil
+	}
+
+	return &ast.SelectorExpr{
+		X:   &ast.Ident{Name: names.assert},
+		Sel: selector.Sel,
 	}
 }
 
@@ -117,6 +147,9 @@ func (c call) String() string {
 }
 
 func (c call) StringWithFileInfo() string {
+	if c.fileset.File(c.expr.Pos()) == nil {
+		return fmt.Sprintf("%s at unknown file", c)
+	}
 	return fmt.Sprintf("%s at %s:%d", c,
 		relativePath(c.fileset.File(c.expr.Pos()).Name()),
 		c.fileset.Position(c.expr.Pos()).Line)
@@ -229,9 +262,9 @@ func convert(tcall call, migration migration) ast.Node {
 	case "NoError", "NoErrorf":
 		// use assert.NoError() if there are no extra args
 		if len(tcall.expr.Args) == 2 && tcall.xIdent.Name == imports.testifyRequire {
-			return newCallExpr(imports.assert, "NoError", tcall.expr.Args)
+			return newCallExpr(imports.assert, "NilError", tcall.expr.Args)
 		}
-		return convertOneArgComparison(tcall, imports, "NoError")
+		return convertOneArgComparison(tcall, imports, "NilError")
 	case "True", "Truef":
 		return convertTrue(tcall, imports)
 	case "False", "Falsef":
