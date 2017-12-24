@@ -19,9 +19,10 @@ import (
 )
 
 type options struct {
-	dirs   []string
-	dryRun bool
-	debug  bool
+	dirs          []string
+	dryRun        bool
+	debug         bool
+	cmpImportName string
 }
 
 func main() {
@@ -51,6 +52,8 @@ func setupFlags(name string) (*pflag.FlagSet, *options) {
 	flags := pflag.NewFlagSet(name, pflag.ContinueOnError)
 	flags.BoolVar(&opts.dryRun, "dry-run", false, "don't write to file")
 	flags.BoolVar(&opts.debug, "debug", false, "enable debug logging")
+	flags.StringVar(&opts.cmpImportName, "import-cmp-alias", "",
+		"import alias to use for the assert/cmp package")
 	// TODO: set usage func to print more usage
 	return flags, &opts
 }
@@ -80,7 +83,7 @@ func run(opts *options) error {
 			for _, astFile := range pkg.Files {
 				absFilename := fileset.File(astFile.Pos()).Name()
 				filename := relativePath(absFilename)
-				importNames := newImportNames(astFile.Imports)
+				importNames := newImportNames(astFile.Imports, opts)
 				if !importNames.hasTestifyImports() {
 					debugf("skipping file %s, no imports", filename)
 					continue
@@ -146,7 +149,7 @@ func (p importNames) funcNameFromTestifyName(name string) string {
 	return "Assert"
 }
 
-func newImportNames(imports []*ast.ImportSpec) importNames {
+func newImportNames(imports []*ast.ImportSpec, opt *options) importNames {
 	importNames := importNames{
 		assert: path.Base(pkgAssert),
 		cmp:    path.Base(pkgCmp),
@@ -165,6 +168,10 @@ func newImportNames(imports []*ast.ImportSpec) importNames {
 				importNames.cmp = "gtycmp"
 			}
 		}
+	}
+
+	if opt.cmpImportName != "" {
+		importNames.cmp = opt.cmpImportName
 	}
 	return importNames
 }

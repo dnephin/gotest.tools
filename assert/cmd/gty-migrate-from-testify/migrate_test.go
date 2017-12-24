@@ -1,16 +1,15 @@
 package main
 
 import (
-	"bytes"
-	"github.com/gotestyourself/gotestyourself/assert"
-	"github.com/gotestyourself/gotestyourself/assert/cmp"
-	"go/format"
 	"go/parser"
 	"go/token"
 	"testing"
+
+	"github.com/gotestyourself/gotestyourself/assert"
+	"github.com/gotestyourself/gotestyourself/assert/cmp"
 )
 
-func TestReplaceTestingT(t *testing.T) {
+func TestMigrateFileReplacesTestingT(t *testing.T) {
 	source := `
 package foo
 
@@ -35,9 +34,9 @@ func do(t require.TestingT) {}
 	expected := `package foo
 
 import (
-	"github.com/gotestyourself/gotestyourself/assert"
-	"github.com/gotestyourself/gotestyourself/assert/cmp"
 	"testing"
+
+	"github.com/gotestyourself/gotestyourself/assert"
 )
 
 func TestSomething(t *testing.T) {
@@ -51,9 +50,9 @@ func TestSomething(t *testing.T) {
 func do(t assert.TestingT) {}
 `
 
-	buf := new(bytes.Buffer)
-	format.Node(buf, migration.fileset, migration.file)
-	assert.Assert(t, cmp.EqualMultiLine(expected, buf.String()))
+	actual, err := formatFile(migration.file, migration.fileset)
+	assert.NilError(t, err)
+	assert.Assert(t, cmp.EqualMultiLine(expected, string(actual)))
 }
 
 func newMigrationFromSource(t *testing.T, source string) migration {
@@ -67,6 +66,42 @@ func newMigrationFromSource(t *testing.T, source string) migration {
 	return migration{
 		file:        nodes,
 		fileset:     fileset,
-		importNames: newImportNames(nodes.Imports),
+		importNames: newImportNames(nodes.Imports, &options{}),
 	}
+}
+
+func TestMigrateFileWithNamedCmpPackage(t *testing.T) {
+	source := `
+package foo
+
+import (
+	"testing"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestSomething(t *testing.T) {
+	assert.Equal(t, "a", "b")
+}
+`
+	migration := newMigrationFromSource(t, source)
+	migration.importNames.cmp = "is"
+	migrateFile(migration)
+
+	expected := `package foo
+
+import (
+	"testing"
+
+	"github.com/gotestyourself/gotestyourself/assert"
+	is "github.com/gotestyourself/gotestyourself/assert/cmp"
+)
+
+func TestSomething(t *testing.T) {
+	assert.Check(t, is.Equal("a", "b"))
+}
+`
+
+	actual, err := formatFile(migration.file, migration.fileset)
+	assert.NilError(t, err)
+	assert.Assert(t, cmp.EqualMultiLine(expected, string(actual)))
 }
