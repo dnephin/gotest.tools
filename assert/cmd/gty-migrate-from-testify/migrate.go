@@ -10,6 +10,7 @@ import (
 	"path"
 
 	"golang.org/x/tools/go/ast/astutil"
+	"reflect"
 )
 
 const (
@@ -56,73 +57,62 @@ func updateImports(migration migration) {
 
 func replaceCalls(migration migration) func(cursor *astutil.Cursor) bool {
 	return func(cursor *astutil.Cursor) bool {
-		newNode := replaceTestingT(cursor.Node(), migration.importNames)
+		var newNode ast.Node
+		switch typed := cursor.Node().(type) {
+		case *ast.SelectorExpr:
+			newNode = getReplacementTestingT(typed, migration.importNames)
+		case *ast.CallExpr:
+			newNode = getReplacementAssertion(typed, migration)
+		}
+
 		if newNode != nil {
 			cursor.Replace(newNode)
-			return true
 		}
-
-		tcall, ok := isTestifyCall(cursor.Node(), migration)
-		if !ok {
-			return true
-		}
-
-		if !isPackageCall(tcall) {
-			// TODO: also convert assert.New() ...
-			log.Printf("Skipping call without t %s", tcall.StringWithFileInfo())
-			return true
-		}
-
-		newNode = convert(tcall, migration)
-		if newNode == nil {
-			log.Printf("Skipping %s", tcall.StringWithFileInfo())
-			return true
-		}
-
-		cursor.Replace(newNode)
 		return true
 	}
 }
 
-func replaceTestingT(node ast.Node, names importNames) ast.Node {
-	selector, ok := node.(*ast.SelectorExpr)
-	if !ok {
-		return nil
-	}
+func getReplacementTestingT(selector *ast.SelectorExpr, names importNames) ast.Node {
 	xIdent, ok := selector.X.(*ast.Ident)
 	if !ok {
 		return nil
 	}
-
-	if selector.Sel.Name != "TestingT" {
+	if selector.Sel.Name != "TestingT" || !names.matchesTestify(xIdent) {
 		return nil
 	}
-
-	if !names.matchesTestify(xIdent) {
-		return nil
-	}
-
 	return &ast.SelectorExpr{
 		X:   &ast.Ident{Name: names.assert},
 		Sel: selector.Sel,
 	}
 }
 
-func isTestifyCall(node ast.Node, migration migration) (call, bool) {
-	c := call{}
-	callExpr, ok := node.(*ast.CallExpr)
+func getReplacementAssertion(callExpr *ast.CallExpr, migration migration) ast.Node {
+	tcall, ok := newCallFromNode(callExpr, migration)
 	if !ok {
-		return c, false
+		return nil
 	}
+	if !migration.importNames.matchesTestify(tcall.xIdent) {
+		return nil
+	}
+	if !callAcceptsTestingT(tcall, migration.importNames) {
+		log.Printf("Skipping call, no testing.T as first arg %s", tcall.StringWithFileInfo())
+		return nil
+	}
+
+	if len(tcall.expr.Args) < 2 {
+		return convertTestifySingleArgCall(tcall, migration)
+	}
+	return convertTestifyAssertion(tcall, migration)
+}
+
+func newCallFromNode(callExpr *ast.CallExpr, migration migration) (call, bool) {
+	c := call{}
 	selector, ok := callExpr.Fun.(*ast.SelectorExpr)
 	if !ok {
 		return c, false
 	}
 	ident, ok := selector.X.(*ast.Ident)
 	if !ok {
-		return c, false
-	}
-	if !migration.importNames.matchesTestify(ident) {
 		return c, false
 	}
 	return call{
@@ -166,60 +156,68 @@ func (c call) extraArgs(index int) []ast.Expr {
 	return c.expr.Args[index:]
 }
 
-func isPackageCall(tcall call) bool {
-	if len(tcall.expr.Args) < 2 {
-		return false
-	}
-
+func callAcceptsTestingT(tcall call, importNames importNames) bool {
 	switch typed := tcall.expr.Args[0].(type) {
 	case *ast.Ident:
-		if typed.Name == "t" {
-			return true
-		}
 		field, ok := typed.Obj.Decl.(*ast.Field)
 		if !ok {
 			return false
 		}
-		return isTestingTStarExpr(field.Type)
+		return isTestingTArg(field.Type, importNames)
 
 	case *ast.SelectorExpr:
-		return isSelectorFieldTypeTestingT(typed)
+		return isSelectorFieldTypeTestingT(typed, importNames)
 	}
 
 	return false
 }
 
-func isTestingTStarExpr(objType interface{}) bool {
-	starExpr, ok := objType.(*ast.StarExpr)
+func isTestingTArg(objType interface{}, importNames importNames) bool {
+	switch typed := objType.(type) {
+	case *ast.StarExpr:
+		selector, ok := typed.X.(*ast.SelectorExpr)
+		if !ok {
+			return false
+		}
+		// TODO: use import names
+		return any(
+			matchSelector(selector, "testing", "T"),
+			matchSelector(selector, "testing", "B"),
+			matchSelector(selector, "check", "C"))
+
+	case *ast.SelectorExpr:
+		return any(
+			matchSelector(typed, importNames.testifyAssert, "TestingT"),
+			matchSelector(typed, importNames.testifyRequire, "TestingT"))
+	}
+	return false
+}
+
+func matchSelector(selExpr *ast.SelectorExpr, ident, sel string) bool {
+	xIdent, ok := selExpr.X.(*ast.Ident)
 	if !ok {
+		debugf("unexpected selector.X (%T) %s", selExpr.X, selExpr.X)
 		return false
 	}
+	return selExpr.Sel.Name == sel && xIdent.Name == ident
+}
 
-	selector, ok := starExpr.X.(*ast.SelectorExpr)
-	if !ok {
-		return false
-	}
-
-	xIdent, ok := selector.X.(*ast.Ident)
-	if !ok {
-		return false
-	}
-
-	switch xIdent.Name {
-	case "testing":
-		return selector.Sel.Name == "T" || selector.Sel.Name == "B"
-	case "check":
-		return selector.Sel.Name == "C"
+func any(conds ...bool) bool {
+	for _, cond := range conds {
+		if cond {
+			return true
+		}
 	}
 	return false
 }
 
 // isSelectorFieldTypeTestingT examines the ast.SelectorExpr and returns
 // the package.Type name for the field
-func isSelectorFieldTypeTestingT(selectorExpr *ast.SelectorExpr) bool {
-	fieldName := selectorExpr.Sel.Name
+// TODO: use walkSelectorExpr
+func isSelectorFieldTypeTestingT(selector *ast.SelectorExpr, importNames importNames) bool {
+	fieldName := selector.Sel.Name
 
-	xIdent, ok := selectorExpr.X.(*ast.Ident)
+	xIdent, ok := selector.X.(*ast.Ident)
 	if !ok {
 		return false
 	}
@@ -247,7 +245,7 @@ func isSelectorFieldTypeTestingT(selectorExpr *ast.SelectorExpr) bool {
 	for _, field := range structType.Fields.List {
 		for _, nameIdent := range field.Names {
 			if nameIdent.Name == fieldName {
-				return isTestingTStarExpr(field.Type)
+				return isTestingTArg(field.Type, importNames)
 			}
 		}
 	}
@@ -255,7 +253,22 @@ func isSelectorFieldTypeTestingT(selectorExpr *ast.SelectorExpr) bool {
 	return false
 }
 
-func convert(tcall call, migration migration) ast.Node {
+func convertTestifySingleArgCall(tcall call, migration migration) ast.Node {
+	switch tcall.selExpr.Sel.Name {
+	case "TestingT":
+		// Already handled as SelectorExpr
+		return nil
+	case "New":
+		// TODO: assert.New() - astutil.Apply() -> get selector.X from lhs of assignment
+		log.Printf("not yet implemented: %s", tcall.StringWithFileInfo())
+		return nil
+	default:
+		log.Printf("Skipping unknown %s", tcall.StringWithFileInfo())
+		return nil
+	}
+}
+
+func convertTestifyAssertion(tcall call, migration migration) ast.Node {
 	imports := migration.importNames
 
 	switch tcall.selExpr.Sel.Name {
@@ -296,6 +309,7 @@ func convert(tcall call, migration migration) ast.Node {
 	case "NotEmpty", "NotEmptyf":
 		return convertNotEmpty(tcall, imports)
 	}
+	log.Printf("Skipping %s", tcall.StringWithFileInfo())
 	return nil
 }
 
@@ -346,33 +360,19 @@ func convertEqual(tcall call, migration migration) ast.Node {
 	cmpEquals := convertTwoArgComparison(tcall, imports, "Equal")
 	cmpCompare := convertTwoArgComparison(tcall, imports, "Compare")
 
-	switch typed := tcall.expr.Args[1].(type) {
-	case *ast.BasicLit:
-		return cmpEquals
-	case *ast.CompositeLit:
-		return cmpCompare
-	case *ast.Ident:
-		if typed.Obj == nil || typed.Obj.Decl == nil {
-			return cmpCompare
-		}
-		switch declTyped := typed.Obj.Decl.(type) {
-		case *ast.AssignStmt:
-			switch declTyped.Rhs[0].(type) {
-			case *ast.BasicLit:
-				return cmpEquals
-			case *ast.CompositeLit:
-				return cmpCompare
-			case *ast.CallExpr:
-				// TODO: share with other CallExpr branch
-			default:
-				// TODO: struct type
-			}
-		}
-	case *ast.CallExpr:
-		// TODO:
+	kind := walk(tcall.expr.Args[1])
+	if kind == reflect.Invalid {
+		kind = walk(tcall.expr.Args[2])
 	}
 
-	return cmpCompare
+	switch {
+	case kind == reflect.Invalid:
+		return cmpCompare
+	case kind <= reflect.Complex128 || kind == reflect.String:
+		return cmpEquals
+	default:
+		return cmpCompare
+	}
 }
 
 func convertTwoArgComparison(tcall call, imports importNames, cmpName string) ast.Node {

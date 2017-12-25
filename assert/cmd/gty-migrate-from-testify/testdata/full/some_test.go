@@ -74,3 +74,15 @@ func TestEqualsWithComplexTypes(t *testing.T) {
 func doInt() int {
 	return 1
 }
+
+func TestEqualWithPrimitiveTypes(t *testing.T) {
+	s := "foo"
+	ptrString := &s
+	assert.Equal(t, *ptrString, "foo")
+
+	assert.Equal(t, doInt(), doInt())
+
+	x := doInt()
+	y := doInt()
+	assert.Equal(t, x, y)
+}

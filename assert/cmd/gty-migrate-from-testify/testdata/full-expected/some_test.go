@@ -62,10 +62,21 @@ func TestEqualsWithComplexTypes(t *testing.T) {
 
 	expectedI := 123
 	assert.Check(t, cmp.Equal(expectedI, 0))
-	assert.Check(t, cmp.Compare(doInt(), 3))
+	assert.Check(t, cmp.Equal(doInt(), 3))
 	// TODO: struct field
 }
 
 func doInt() int {
 	return 1
+}
+
+func TestEqualWithPrimitiveTypes(t *testing.T) {
+	s := "foo"
+	ptrString := &s
+	assert.Check(t, cmp.Equal(*ptrString, "foo"))
+	assert.Check(t, cmp.Equal(doInt(), doInt()))
+
+	x := doInt()
+	y := doInt()
+	assert.Check(t, cmp.Equal(x, y))
 }
