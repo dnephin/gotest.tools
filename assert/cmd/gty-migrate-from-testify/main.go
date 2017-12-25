@@ -100,7 +100,7 @@ func run(opts *options) error {
 					continue
 				}
 
-				raw, err := formatFile(astFile, fileset)
+				raw, err := formatFile(m)
 				if err != nil {
 					return errors.Wrapf(err, "failed to format %s", filename)
 				}
@@ -143,10 +143,14 @@ func (p importNames) matchesTestify(ident *ast.Ident) bool {
 }
 
 func (p importNames) funcNameFromTestifyName(name string) string {
-	if name == p.testifyAssert {
+	switch name {
+	case p.testifyAssert:
 		return "Check"
+	case p.testifyRequire:
+		return "Assert"
+	default:
+		panic("unknown testify package name: " + name)
 	}
-	return "Assert"
 }
 
 func newImportNames(imports []*ast.ImportSpec, opt *options) importNames {
@@ -190,11 +194,12 @@ func identOrDefault(ident *ast.Ident, def string) string {
 	return def
 }
 
-func formatFile(astFile *ast.File, fileset *token.FileSet) ([]byte, error) {
+func formatFile(migration migration) ([]byte, error) {
 	buf := new(bytes.Buffer)
-	err := format.Node(buf, fileset, astFile)
+	err := format.Node(buf, migration.fileset, migration.file)
 	if err != nil {
 		return nil, err
 	}
-	return imports.Process(fileset.File(astFile.Pos()).Name(), buf.Bytes(), nil)
+	filename := migration.fileset.File(migration.file.Pos()).Name()
+	return imports.Process(filename, buf.Bytes(), nil)
 }

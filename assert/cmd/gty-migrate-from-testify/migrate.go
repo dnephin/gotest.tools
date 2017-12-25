@@ -8,9 +8,9 @@ import (
 	"go/token"
 	"log"
 	"path"
+	"reflect"
 
 	"golang.org/x/tools/go/ast/astutil"
-	"reflect"
 )
 
 const (
@@ -273,11 +273,7 @@ func convertTestifyAssertion(tcall call, migration migration) ast.Node {
 
 	switch tcall.selExpr.Sel.Name {
 	case "NoError", "NoErrorf":
-		// use assert.NoError() if there are no extra args
-		if len(tcall.expr.Args) == 2 && tcall.xIdent.Name == imports.testifyRequire {
-			return newCallExpr(imports.assert, "NilError", tcall.expr.Args)
-		}
-		return convertOneArgComparison(tcall, imports, "NilError")
+		return convertNoError(tcall, imports)
 	case "True", "Truef":
 		return convertTrue(tcall, imports)
 	case "False", "Falsef":
@@ -327,10 +323,38 @@ func newCallExprArgs(t ast.Expr, cmp ast.Expr, extra ...ast.Expr) []ast.Expr {
 	return append(append([]ast.Expr{t}, cmp), extra...)
 }
 
+func newCallExprWithPosition(tcall call, imports importNames, args []ast.Expr) *ast.CallExpr {
+	return &ast.CallExpr{
+		Fun: &ast.SelectorExpr{
+			X: &ast.Ident{
+				Name:    imports.assert,
+				NamePos: tcall.xIdent.NamePos,
+			},
+			Sel: &ast.Ident{Name: imports.funcNameFromTestifyName(tcall.xIdent.Name)},
+		},
+		Args: args,
+	}
+}
+
+func convertNoError(tcall call, imports importNames) ast.Node {
+	// use assert.NoError() if there are no extra args
+	if len(tcall.expr.Args) == 2 && tcall.xIdent.Name == imports.testifyRequire {
+		return &ast.CallExpr{
+			Fun: &ast.SelectorExpr{
+				X: &ast.Ident{
+					Name:    imports.assert,
+					NamePos: tcall.xIdent.NamePos,
+				},
+				Sel: &ast.Ident{Name: "NilError"},
+			},
+			Args: tcall.expr.Args,
+		}
+	}
+	return convertOneArgComparison(tcall, imports, "NilError")
+}
+
 func convertOneArgComparison(tcall call, imports importNames, cmpName string) ast.Node {
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+	return newCallExprWithPosition(tcall, imports,
 		newCallExprArgs(
 			tcall.testingT(),
 			newCallExpr(imports.cmp, cmpName, []ast.Expr{tcall.expr.Args[1]}),
@@ -338,16 +362,11 @@ func convertOneArgComparison(tcall call, imports importNames, cmpName string) as
 }
 
 func convertTrue(tcall call, imports importNames) ast.Node {
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
-		tcall.expr.Args)
+	return newCallExprWithPosition(tcall, imports, tcall.expr.Args)
 }
 
 func convertFalse(tcall call, imports importNames) ast.Node {
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+	return newCallExprWithPosition(tcall, imports,
 		newCallExprArgs(
 			tcall.testingT(),
 			&ast.UnaryExpr{Op: token.NOT, X: tcall.expr.Args[1]},
@@ -376,9 +395,7 @@ func convertEqual(tcall call, migration migration) ast.Node {
 }
 
 func convertTwoArgComparison(tcall call, imports importNames, cmpName string) ast.Node {
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+	return newCallExprWithPosition(tcall, imports,
 		newCallExprArgs(
 			tcall.testingT(),
 			newCallExpr(imports.cmp, cmpName, tcall.expr.Args[1:3]),
@@ -386,9 +403,7 @@ func convertTwoArgComparison(tcall call, imports importNames, cmpName string) as
 }
 
 func convertError(tcall call, imports importNames) ast.Node {
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+	return newCallExprWithPosition(tcall, imports,
 		newCallExprArgs(
 			tcall.testingT(),
 			newCallExpr(
@@ -399,9 +414,7 @@ func convertError(tcall call, imports importNames) ast.Node {
 }
 
 func convertEmpty(tcall call, imports importNames) ast.Node {
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+	return newCallExprWithPosition(tcall, imports,
 		newCallExprArgs(
 			tcall.testingT(),
 			newCallExpr(
@@ -417,9 +430,7 @@ func convertNegativeComparison(
 	right ast.Expr,
 	extra int,
 ) ast.Node {
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+	return newCallExprWithPosition(tcall, imports,
 		newCallExprArgs(
 			tcall.testingT(),
 			&ast.BinaryExpr{X: tcall.expr.Args[1], Op: token.NEQ, Y: right},
@@ -447,9 +458,7 @@ func convertNotEmpty(tcall call, imports importNames) ast.Node {
 		Args: tcall.expr.Args[1:2],
 	}
 	zeroExpr := &ast.BasicLit{Kind: token.INT, Value: "0"}
-	return newCallExpr(
-		imports.assert,
-		imports.funcNameFromTestifyName(tcall.xIdent.Name),
+	return newCallExprWithPosition(tcall, imports,
 		newCallExprArgs(
 			tcall.testingT(),
 			&ast.BinaryExpr{X: lenExpr, Op: token.NEQ, Y: zeroExpr},

@@ -18,6 +18,7 @@ func TestFirstThing(t *testing.T) {
 	assert.Check(t, false)
 	assert.Check(t, !true)
 	assert.NilError(t, nil)
+
 	assert.Check(t, cmp.Compare(map[string]bool{"a": true}, nil))
 	assert.Check(t, cmp.Compare([]int{1}, nil))
 }
@@ -25,8 +26,11 @@ func TestFirstThing(t *testing.T) {
 func TestSecondThing(t *testing.T) {
 	var foo mystruct
 	assert.Assert(t, cmp.Compare(foo, mystruct{}))
+
 	assert.Assert(t, cmp.Compare(mystruct{}, mystruct{}))
+
 	assert.Check(t, cmp.NilError(nil), "foo %d", 3)
+
 	assert.Check(t, cmp.ErrorContains(fmt.Errorf("foo"), ""))
 }
 
@@ -62,6 +66,7 @@ func TestEqualsWithComplexTypes(t *testing.T) {
 
 	expectedI := 123
 	assert.Check(t, cmp.Equal(expectedI, 0))
+
 	assert.Check(t, cmp.Equal(doInt(), 3))
 	// TODO: struct field
 }
@@ -74,6 +79,7 @@ func TestEqualWithPrimitiveTypes(t *testing.T) {
 	s := "foo"
 	ptrString := &s
 	assert.Check(t, cmp.Equal(*ptrString, "foo"))
+
 	assert.Check(t, cmp.Equal(doInt(), doInt()))
 
 	x := doInt()

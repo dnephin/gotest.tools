@@ -50,7 +50,7 @@ func TestSomething(t *testing.T) {
 func do(t assert.TestingT) {}
 `
 
-	actual, err := formatFile(migration.file, migration.fileset)
+	actual, err := formatFile(migration)
 	assert.NilError(t, err)
 	assert.Assert(t, cmp.EqualMultiLine(expected, string(actual)))
 }
@@ -101,7 +101,44 @@ func TestSomething(t *testing.T) {
 }
 `
 
-	actual, err := formatFile(migration.file, migration.fileset)
+	actual, err := formatFile(migration)
+	assert.NilError(t, err)
+	assert.Assert(t, cmp.EqualMultiLine(expected, string(actual)))
+}
+
+func TestMigrateFileWithCommentsOnAssert(t *testing.T) {
+	source := `
+package foo
+
+import (
+	"testing"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestSomething(t *testing.T) {
+	// This is going to fail
+	assert.Equal(t, "a", "b")
+}
+`
+	migration := newMigrationFromSource(t, source)
+	migrateFile(migration)
+
+	expected := `package foo
+
+import (
+	"testing"
+
+	"github.com/gotestyourself/gotestyourself/assert"
+	"github.com/gotestyourself/gotestyourself/assert/cmp"
+)
+
+func TestSomething(t *testing.T) {
+	// This is going to fail
+	assert.Check(t, cmp.Equal("a", "b"))
+}
+`
+
+	actual, err := formatFile(migration)
 	assert.NilError(t, err)
 	assert.Assert(t, cmp.EqualMultiLine(expected, string(actual)))
 }
