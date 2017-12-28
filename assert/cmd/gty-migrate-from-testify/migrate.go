@@ -6,9 +6,9 @@ import (
 	"go/ast"
 	"go/format"
 	"go/token"
+	"go/types"
 	"log"
 	"path"
-	"reflect"
 
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/loader"
@@ -381,19 +381,28 @@ func convertEqual(tcall call, migration migration) ast.Node {
 	cmpEquals := convertTwoArgComparison(tcall, imports, "Equal")
 	cmpCompare := convertTwoArgComparison(tcall, imports, "Compare")
 
-	kind := walk(tcall.expr.Args[1])
-	if kind == reflect.Invalid {
-		kind = walk(tcall.expr.Args[2])
+	gotype := walkForType(migration.pkgInfo, tcall.expr.Args[1])
+	if unknownType(gotype) {
+		gotype = walkForType(migration.pkgInfo, tcall.expr.Args[2])
+	}
+	if unknownType(gotype) {
+		return cmpCompare
 	}
 
-	switch {
-	case kind == reflect.Invalid:
-		return cmpCompare
-	case kind <= reflect.Complex128 || kind == reflect.String:
+	switch gotype.Underlying().(type) {
+	case *types.Basic:
 		return cmpEquals
 	default:
 		return cmpCompare
 	}
+}
+
+func unknownType(typ types.Type) bool {
+	if typ == nil {
+		return true
+	}
+	basic, ok := typ.(*types.Basic)
+	return ok && basic.Kind() == types.Invalid
 }
 
 func convertTwoArgComparison(tcall call, imports importNames, cmpName string) ast.Node {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gotestyourself/gotestyourself/assert"
 	"github.com/gotestyourself/gotestyourself/assert/cmp"
+	"golang.org/x/tools/go/loader"
 )
 
 func TestMigrateFileReplacesTestingT(t *testing.T) {
@@ -63,10 +64,25 @@ func newMigrationFromSource(t *testing.T, source string) migration {
 		source,
 		parser.AllErrors|parser.ParseComments)
 	assert.NilError(t, err)
+
+	conf := loader.Config{
+		Fset:        fileset,
+		ParserMode:  parser.ParseComments,
+		Build:       buildContext(),
+		AllowErrors: true,
+	}
+	conf.TypeChecker.Error = func(e error) {}
+	conf.CreateFromFiles("foo.go", nodes)
+	prog, err := conf.Load()
+	assert.NilError(t, err)
+
+	pkgInfo := prog.InitialPackages()[0]
+
 	return migration{
-		file:        nodes,
+		file:        pkgInfo.Files[0],
 		fileset:     fileset,
 		importNames: newImportNames(nodes.Imports, options{}),
+		pkgInfo:     pkgInfo,
 	}
 }
 

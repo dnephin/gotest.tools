@@ -9,6 +9,8 @@ import (
 )
 
 type mystruct struct {
+	a        int
+	expected int
 }
 
 func TestFirstThing(t *testing.T) {
@@ -85,4 +87,27 @@ func TestEqualWithPrimitiveTypes(t *testing.T) {
 	x := doInt()
 	y := doInt()
 	assert.Check(t, cmp.Equal(x, y))
+
+	tc := mystruct{a: 3, expected: 5}
+	assert.Check(t, cmp.Equal(tc.a, tc.expected))
+}
+
+func TestTableTest(t *testing.T) {
+	var testcases = []struct {
+		opts         []string
+		actual       string
+		expected     string
+		expectedOpts []string
+	}{
+		{
+			opts:     []string{"a", "b"},
+			actual:   "foo",
+			expected: "else",
+		},
+	}
+
+	for _, testcase := range testcases {
+		assert.Check(t, cmp.Equal(testcase.actual, testcase.expected))
+		assert.Check(t, cmp.Compare(testcase.opts, testcase.expectedOpts))
+	}
 }
