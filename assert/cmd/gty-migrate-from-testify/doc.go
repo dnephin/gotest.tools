@@ -9,6 +9,10 @@ To run on all packages (including external test packages) use:
 		-f '{{.ImportPath}} {{if .XTestGoFiles}}{{"\n"}}{{.ImportPath}}_test{{end}}' \
 		./... | xargs gty-migrate-from-testify
 
+The cmp package can be aliases to make the assertions more readable:
+
+    gty-migrate-from-testify --import-cmp-alias=is
+
 */
 
 package main

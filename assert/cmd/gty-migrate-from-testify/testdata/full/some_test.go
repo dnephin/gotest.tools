@@ -53,6 +53,9 @@ func thing(t *testing.T) unit {
 func TestStoredTestingT(t *testing.T) {
 	u := thing(t)
 	assert.Equal(u.c, "A", "b")
+
+	u = unit{c: t}
+	assert.Equal(u.c, "A", "b")
 }
 
 func TestNotNamedT(c *testing.T) {

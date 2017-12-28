@@ -23,3 +23,11 @@ func walkForType(pkgInfo *loader.PackageInfo, node ast.Node) types.Type {
 	ast.Inspect(node, visit)
 	return result
 }
+
+func isUnknownType(typ types.Type) bool {
+	if typ == nil {
+		return true
+	}
+	basic, ok := typ.(*types.Basic)
+	return ok && basic.Kind() == types.Invalid
+}

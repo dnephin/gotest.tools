@@ -18,8 +18,7 @@ func TestRun(t *testing.T) {
 
 	defer env.Patch(t, "GOPATH", dir.Path())()
 	err := run(options{
-		pkgs:           []string{"example.com/example"},
-		hideLoadErrors: true,
+		pkgs: []string{"example.com/example"},
 	})
 	assert.NilError(t, err)
 

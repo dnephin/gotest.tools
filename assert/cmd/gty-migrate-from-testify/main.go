@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/build"
 	"go/format"
@@ -21,11 +22,11 @@ import (
 )
 
 type options struct {
-	pkgs           []string
-	dryRun         bool
-	debug          bool
-	cmpImportName  string
-	hideLoadErrors bool
+	pkgs             []string
+	dryRun           bool
+	debug            bool
+	cmpImportName    string
+	showLoaderErrors bool
 }
 
 func main() {
@@ -57,6 +58,8 @@ func setupFlags(name string) (*pflag.FlagSet, *options) {
 	flags.BoolVar(&opts.debug, "debug", false, "enable debug logging")
 	flags.StringVar(&opts.cmpImportName, "import-cmp-alias", "",
 		"import alias to use for the assert/cmp package")
+	flags.BoolVar(&opts.showLoaderErrors, "print-loader-errors", false,
+		"print errors from loading source")
 	// TODO: set usage func to print more usage
 	return flags, &opts
 }
@@ -128,7 +131,16 @@ func loadProgram(opts options) (*loader.Program, error) {
 	for _, pkg := range opts.pkgs {
 		conf.ImportWithTests(pkg)
 	}
-	if opts.hideLoadErrors {
+	if opts.showLoaderErrors {
+		// Using conf.Build.UseAllFiles causes lots of errors, hide any
+		// from the stdlib
+		conf.TypeChecker.Error = func(err error) {
+			if strings.HasPrefix(err.Error(), conf.Build.GOROOT) {
+				return
+			}
+			fmt.Fprintln(os.Stderr, err)
+		}
+	} else {
 		conf.TypeChecker.Error = func(e error) {}
 	}
 	return conf.Load()
@@ -193,10 +205,10 @@ func newImportNames(imports []*ast.ImportSpec, opt options) importNames {
 		case pkgTestifyRequire, pkgGopkgTestifyRequire:
 			importNames.testifyRequire = identOrDefault(spec.Name, "require")
 		default:
-			if importedAs(spec, "assert") {
+			if importedAs(spec, path.Base(pkgAssert)) {
 				importNames.assert = "gtyassert"
 			}
-			if importedAs(spec, "cmp") {
+			if importedAs(spec, path.Base(pkgCmp)) {
 				importNames.cmp = "gtycmp"
 			}
 		}

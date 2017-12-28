@@ -52,7 +52,10 @@ func thing(t *testing.T) unit {
 
 func TestStoredTestingT(t *testing.T) {
 	u := thing(t)
-	assert.Equal(u.c, "A", "b")
+	assert.Check(u.c, cmp.Equal("A", "b"))
+
+	u = unit{c: t}
+	assert.Check(u.c, cmp.Equal("A", "b"))
 }
 
 func TestNotNamedT(c *testing.T) {
