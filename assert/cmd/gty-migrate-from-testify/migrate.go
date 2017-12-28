@@ -19,6 +19,8 @@ const (
 	pkgGopkgTestifyAssert  = "gopkg.in/stretchr/testify.v1/assert"
 	pkgTestifyRequire      = "github.com/stretchr/testify/require"
 	pkgGopkgTestifyRequire = "gopkg.in/stretchr/testify.v1/require"
+	pkgGocheck             = "github.com/go-check/check"
+	pkgGopkgGocheck        = "gopkg.in/check.v1"
 	pkgAssert              = "github.com/gotestyourself/gotestyourself/assert"
 	pkgCmp                 = "github.com/gotestyourself/gotestyourself/assert/cmp"
 )
@@ -167,15 +169,15 @@ func callAcceptsTestingT(tcall call, migration migration) bool {
 		debugf("failed to get type for first arg: %s", tcall)
 		return false
 	}
-	importNames := migration.importNames
 
-	// TODO: use import names
 	switch typ.String() {
-	case "*testing.T", "*testing.B", "*check.C":
+	case "*testing.T", "*testing.B":
 		return true
-	case importNames.testifyAssert + ".TestingT":
+	case "*" + pkgGopkgGocheck + ".C", "*" + pkgGocheck + ".C":
 		return true
-	case importNames.testifyRequire + ".TestingT":
+	case pkgTestifyAssert + ".TestingT", pkgGopkgTestifyAssert + ".TestingT":
+		return true
+	case pkgTestifyRequire + ".TestingT", pkgGopkgTestifyRequire + ".TestingT":
 		return true
 	default:
 		return false
