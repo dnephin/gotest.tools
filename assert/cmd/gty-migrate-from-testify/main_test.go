@@ -2,23 +2,28 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"testing"
 
 	"github.com/gotestyourself/gotestyourself/assert"
+	"github.com/gotestyourself/gotestyourself/env"
 	"github.com/gotestyourself/gotestyourself/fs"
 	"github.com/gotestyourself/gotestyourself/golden"
 )
 
 func TestRun(t *testing.T) {
-	dir := fs.NewDir(t, "test-run", fs.FromDir("testdata/full"))
-	log.SetFlags(0)
-	err := run(&options{
-		dirs: []string{dir.Path()},
+	setupLogging(&options{})
+	dir := fs.NewDir(t, "test-run",
+		fs.WithDir("src/example.com/example", fs.FromDir("testdata/full")))
+	defer dir.Remove()
+
+	defer env.Patch(t, "GOPATH", dir.Path())()
+	err := run(options{
+		pkgs:           []string{"example.com/example"},
+		hideLoadErrors: true,
 	})
 	assert.NilError(t, err)
 
-	raw, err := ioutil.ReadFile(dir.Join("some_test.go"))
+	raw, err := ioutil.ReadFile(dir.Join("src/example.com/example/some_test.go"))
 	assert.NilError(t, err)
 	golden.Assert(t, string(raw), "full-expected/some_test.go")
 }

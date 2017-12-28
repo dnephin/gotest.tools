@@ -66,7 +66,7 @@ func newMigrationFromSource(t *testing.T, source string) migration {
 	return migration{
 		file:        nodes,
 		fileset:     fileset,
-		importNames: newImportNames(nodes.Imports, &options{}),
+		importNames: newImportNames(nodes.Imports, options{}),
 	}
 }
 

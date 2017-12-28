@@ -11,6 +11,7 @@ import (
 	"reflect"
 
 	"golang.org/x/tools/go/ast/astutil"
+	"golang.org/x/tools/go/loader"
 )
 
 const (
@@ -26,6 +27,7 @@ type migration struct {
 	file        *ast.File
 	fileset     *token.FileSet
 	importNames importNames
+	pkgInfo     *loader.PackageInfo
 }
 
 func migrateFile(migration migration) {

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"go/ast"
+	"go/build"
 	"go/format"
 	"go/parser"
 	"go/token"
@@ -15,14 +16,16 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
+	"golang.org/x/tools/go/loader"
 	"golang.org/x/tools/imports"
 )
 
 type options struct {
-	dirs          []string
-	dryRun        bool
-	debug         bool
-	cmpImportName string
+	pkgs           []string
+	dryRun         bool
+	debug          bool
+	cmpImportName  string
+	hideLoadErrors bool
 }
 
 func main() {
@@ -30,8 +33,8 @@ func main() {
 	flags, opts := setupFlags(name)
 	handleExitError(name, flags.Parse(os.Args[1:]))
 	setupLogging(opts)
-	opts.dirs = flags.Args()
-	handleExitError(name, run(opts))
+	opts.pkgs = flags.Args()
+	handleExitError(name, run(*opts))
 }
 
 func setupLogging(opts *options) {
@@ -70,49 +73,74 @@ func handleExitError(name string, err error) {
 	}
 }
 
-func run(opts *options) error {
-	debugf("package count: %d", len(opts.dirs))
+func run(opts options) error {
+	program, err := loadProgram(opts)
+	if err != nil {
+		return errors.Wrapf(err, "failed to load program")
+	}
+	pkgs := program.InitialPackages()
+	debugf("package count: %d", len(pkgs))
 
-	fileset := token.NewFileSet()
-	for _, dir := range opts.dirs {
-		pkgs, err := parser.ParseDir(fileset, dir, nil, parser.AllErrors|parser.ParseComments)
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse %s", dir)
-		}
-		for _, pkg := range pkgs {
-			for _, astFile := range pkg.Files {
-				absFilename := fileset.File(astFile.Pos()).Name()
-				filename := relativePath(absFilename)
-				importNames := newImportNames(astFile.Imports, opts)
-				if !importNames.hasTestifyImports() {
-					debugf("skipping file %s, no imports", filename)
-					continue
-				}
+	fileset := program.Fset
+	for _, pkg := range pkgs {
+		for _, astFile := range pkg.Files {
+			absFilename := fileset.File(astFile.Pos()).Name()
+			filename := relativePath(absFilename)
+			importNames := newImportNames(astFile.Imports, opts)
+			if !importNames.hasTestifyImports() {
+				debugf("skipping file %s, no imports", filename)
+				continue
+			}
 
-				debugf("migrating %s with imports: %#v", filename, importNames)
-				m := migration{
-					file:        astFile,
-					fileset:     fileset,
-					importNames: importNames,
-				}
-				migrateFile(m)
-				if opts.dryRun {
-					continue
-				}
+			debugf("migrating %s with imports: %#v", filename, importNames)
+			m := migration{
+				file:        astFile,
+				fileset:     fileset,
+				importNames: importNames,
+				pkgInfo:     pkg,
+			}
+			migrateFile(m)
+			if opts.dryRun {
+				continue
+			}
 
-				raw, err := formatFile(m)
-				if err != nil {
-					return errors.Wrapf(err, "failed to format %s", filename)
-				}
+			raw, err := formatFile(m)
+			if err != nil {
+				return errors.Wrapf(err, "failed to format %s", filename)
+			}
 
-				if err := ioutil.WriteFile(absFilename, raw, 0); err != nil {
-					return errors.Wrapf(err, "failed to write file %s", filename)
-				}
+			if err := ioutil.WriteFile(absFilename, raw, 0); err != nil {
+				return errors.Wrapf(err, "failed to write file %s", filename)
 			}
 		}
 	}
 
 	return nil
+}
+
+func loadProgram(opts options) (*loader.Program, error) {
+	conf := loader.Config{
+		Fset:        token.NewFileSet(),
+		ParserMode:  parser.ParseComments,
+		Build:       buildContext(),
+		AllowErrors: true,
+	}
+	for _, pkg := range opts.pkgs {
+		conf.ImportWithTests(pkg)
+	}
+	if opts.hideLoadErrors {
+		conf.TypeChecker.Error = func(e error) {}
+	}
+	return conf.Load()
+}
+
+func buildContext() *build.Context {
+	c := build.Default
+	c.UseAllFiles = true
+	if val, ok := os.LookupEnv("GOPATH"); ok {
+		c.GOPATH = val
+	}
+	return &c
 }
 
 func relativePath(p string) string {
@@ -153,7 +181,7 @@ func (p importNames) funcNameFromTestifyName(name string) string {
 	}
 }
 
-func newImportNames(imports []*ast.ImportSpec, opt *options) importNames {
+func newImportNames(imports []*ast.ImportSpec, opt options) importNames {
 	importNames := importNames{
 		assert: path.Base(pkgAssert),
 		cmp:    path.Base(pkgCmp),
