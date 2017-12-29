@@ -19,8 +19,6 @@ const (
 	pkgGopkgTestifyAssert  = "gopkg.in/stretchr/testify.v1/assert"
 	pkgTestifyRequire      = "github.com/stretchr/testify/require"
 	pkgGopkgTestifyRequire = "gopkg.in/stretchr/testify.v1/require"
-	pkgGocheck             = "github.com/go-check/check"
-	pkgGopkgGocheck        = "gopkg.in/check.v1"
 	pkgAssert              = "github.com/gotestyourself/gotestyourself/assert"
 	pkgCmp                 = "github.com/gotestyourself/gotestyourself/assert/cmp"
 )
@@ -98,11 +96,6 @@ func getReplacementAssertion(callExpr *ast.CallExpr, migration migration) ast.No
 	if !migration.importNames.matchesTestify(tcall.xIdent) {
 		return nil
 	}
-	if !callAcceptsTestingT(tcall, migration) {
-		log.Printf("Skipping call, no testing.T as first arg %s", tcall.StringWithFileInfo())
-		return nil
-	}
-
 	if len(tcall.expr.Args) < 2 {
 		return convertTestifySingleArgCall(tcall, migration)
 	}
@@ -163,27 +156,6 @@ func (c call) extraArgs(index int) []ast.Expr {
 	return c.expr.Args[index:]
 }
 
-func callAcceptsTestingT(tcall call, migration migration) bool {
-	typ := walkForType(migration.pkgInfo, tcall.testingT())
-	if typ == nil {
-		debugf("failed to get type for first arg: %s", tcall)
-		return false
-	}
-
-	switch typ.String() {
-	case "*testing.T", "*testing.B":
-		return true
-	case "*" + pkgGopkgGocheck + ".C", "*" + pkgGocheck + ".C":
-		return true
-	case pkgTestifyAssert + ".TestingT", pkgGopkgTestifyAssert + ".TestingT":
-		return true
-	case pkgTestifyRequire + ".TestingT", pkgGopkgTestifyRequire + ".TestingT":
-		return true
-	default:
-		return false
-	}
-}
-
 func convertTestifySingleArgCall(tcall call, migration migration) ast.Node {
 	switch tcall.selExpr.Sel.Name {
 	case "TestingT":
@@ -191,10 +163,10 @@ func convertTestifySingleArgCall(tcall call, migration migration) ast.Node {
 		return nil
 	case "New":
 		// TODO: assert.New() - astutil.Apply() -> get selector.X from lhs of assignment
-		log.Printf("not yet implemented: %s", tcall.StringWithFileInfo())
+		log.Printf("%s: not yet implemented", tcall.StringWithFileInfo())
 		return nil
 	default:
-		log.Printf("Skipping unknown %s", tcall.StringWithFileInfo())
+		log.Printf("%s: skipping unknown selector", tcall.StringWithFileInfo())
 		return nil
 	}
 }
@@ -236,7 +208,7 @@ func convertTestifyAssertion(tcall call, migration migration) ast.Node {
 	case "NotEmpty", "NotEmptyf":
 		return convertNotEmpty(tcall, imports)
 	}
-	log.Printf("Skipping %s", tcall.StringWithFileInfo())
+	log.Printf("%s: skipping unsupported assertion", tcall.StringWithFileInfo())
 	return nil
 }
 

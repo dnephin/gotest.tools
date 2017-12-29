@@ -56,7 +56,7 @@ func setupFlags(name string) (*pflag.FlagSet, *options) {
 	flags := pflag.NewFlagSet(name, pflag.ContinueOnError)
 	flags.BoolVar(&opts.dryRun, "dry-run", false, "don't write to file")
 	flags.BoolVar(&opts.debug, "debug", false, "enable debug logging")
-	flags.StringVar(&opts.cmpImportName, "import-cmp-alias", "",
+	flags.StringVar(&opts.cmpImportName, "import-cmp-alias", "is",
 		"import alias to use for the assert/cmp package")
 	flags.BoolVar(&opts.showLoaderErrors, "print-loader-errors", false,
 		"print errors from loading source")
@@ -207,9 +207,6 @@ func newImportNames(imports []*ast.ImportSpec, opt options) importNames {
 		default:
 			if importedAs(spec, path.Base(pkgAssert)) {
 				importNames.assert = "gtyassert"
-			}
-			if importedAs(spec, path.Base(pkgCmp)) {
-				importNames.cmp = "gtycmp"
 			}
 		}
 	}
