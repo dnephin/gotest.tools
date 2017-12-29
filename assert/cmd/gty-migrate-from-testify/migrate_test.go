@@ -65,10 +65,11 @@ func newMigrationFromSource(t *testing.T, source string) migration {
 		parser.AllErrors|parser.ParseComments)
 	assert.NilError(t, err)
 
+	opts := options{}
 	conf := loader.Config{
 		Fset:        fileset,
 		ParserMode:  parser.ParseComments,
-		Build:       buildContext(),
+		Build:       buildContext(opts),
 		AllowErrors: true,
 	}
 	conf.TypeChecker.Error = func(e error) {}
@@ -81,7 +82,7 @@ func newMigrationFromSource(t *testing.T, source string) migration {
 	return migration{
 		file:        pkgInfo.Files[0],
 		fileset:     fileset,
-		importNames: newImportNames(nodes.Imports, options{}),
+		importNames: newImportNames(nodes.Imports, opts),
 		pkgInfo:     pkgInfo,
 	}
 }

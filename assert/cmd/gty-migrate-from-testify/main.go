@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"go/ast"
 	"go/build"
 	"go/format"
@@ -27,6 +26,7 @@ type options struct {
 	debug            bool
 	cmpImportName    string
 	showLoaderErrors bool
+	useAllFiles      bool
 }
 
 func main() {
@@ -60,6 +60,8 @@ func setupFlags(name string) (*pflag.FlagSet, *options) {
 		"import alias to use for the assert/cmp package")
 	flags.BoolVar(&opts.showLoaderErrors, "print-loader-errors", false,
 		"print errors from loading source")
+	flags.BoolVar(&opts.useAllFiles, "ignore-build-tags", false,
+		"use files regardless of +build lines, file names")
 	// TODO: set usage func to print more usage
 	return flags, &opts
 }
@@ -125,30 +127,21 @@ func loadProgram(opts options) (*loader.Program, error) {
 	conf := loader.Config{
 		Fset:        token.NewFileSet(),
 		ParserMode:  parser.ParseComments,
-		Build:       buildContext(),
+		Build:       buildContext(opts),
 		AllowErrors: true,
 	}
 	for _, pkg := range opts.pkgs {
 		conf.ImportWithTests(pkg)
 	}
-	if opts.showLoaderErrors {
-		// Using conf.Build.UseAllFiles causes lots of errors, hide any
-		// from the stdlib
-		conf.TypeChecker.Error = func(err error) {
-			if strings.HasPrefix(err.Error(), conf.Build.GOROOT) {
-				return
-			}
-			fmt.Fprintln(os.Stderr, err)
-		}
-	} else {
+	if !opts.showLoaderErrors {
 		conf.TypeChecker.Error = func(e error) {}
 	}
 	return conf.Load()
 }
 
-func buildContext() *build.Context {
+func buildContext(opts options) *build.Context {
 	c := build.Default
-	c.UseAllFiles = true
+	c.UseAllFiles = opts.useAllFiles
 	if val, ok := os.LookupEnv("GOPATH"); ok {
 		c.GOPATH = val
 	}
