@@ -197,7 +197,7 @@ func convertTestifyAssertion(tcall call, migration migration) ast.Node {
 	case "Empty", "Emptyf":
 		return convertEmpty(tcall, imports)
 	case "Nil", "Nilf":
-		return convertOneArgComparison(tcall, imports, "Nil")
+		return convertNil(tcall, migration)
 	case "NotNil", "NotNilf":
 		return convertNegativeComparison(tcall, imports, &ast.Ident{Name: "nil"}, 2)
 	case "NotEqual", "NotEqualf":
@@ -327,6 +327,14 @@ func convertEmpty(tcall call, imports importNames) ast.Node {
 				"Len",
 				append(tcall.expr.Args[1:2], &ast.BasicLit{Kind: token.INT, Value: "0"})),
 			tcall.extraArgs(2)...))
+}
+
+func convertNil(tcall call, migration migration) ast.Node {
+	gotype := walkForType(migration.pkgInfo, tcall.expr.Args[1])
+	if gotype != nil && gotype.String() == "error" {
+		return convertNoError(tcall, migration.importNames)
+	}
+	return convertOneArgComparison(tcall, migration.importNames, "Nil")
 }
 
 func convertNegativeComparison(
