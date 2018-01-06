@@ -182,7 +182,7 @@ func (p importNames) funcNameFromTestifyName(name string) string {
 	case p.testifyRequire:
 		return "Assert"
 	default:
-		panic("unknown testify package name: " + name)
+		return ""
 	}
 }
 
