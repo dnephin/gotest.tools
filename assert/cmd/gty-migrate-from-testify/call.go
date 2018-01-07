@@ -9,26 +9,6 @@ import (
 	"log"
 )
 
-func newCallFromNode(callExpr *ast.CallExpr, migration migration) (call, bool) {
-	c := call{}
-	selector, ok := callExpr.Fun.(*ast.SelectorExpr)
-	if !ok {
-		return c, false
-	}
-	ident, ok := selector.X.(*ast.Ident)
-	if !ok {
-		return c, false
-	}
-
-	return call{
-		fileset: migration.fileset,
-		expr:    updateCallExprForMissingT(*callExpr),
-		xIdent:  ident,
-		selExpr: selector,
-		assert:  migration.importNames.funcNameFromTestifyName(ident.Name),
-	}, true
-}
-
 type call struct {
 	fileset *token.FileSet
 	expr    *ast.CallExpr
@@ -80,4 +60,43 @@ func (c call) assertionName() string {
 		return "Assert"
 	}
 	return c.assert
+}
+
+func newCallFromNode(callExpr *ast.CallExpr, migration migration) (call, bool) {
+	c := call{}
+	selector, ok := callExpr.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return c, false
+	}
+	ident, ok := selector.X.(*ast.Ident)
+	if !ok {
+		return c, false
+	}
+
+	return call{
+		fileset: migration.fileset,
+		expr:    updateCallExprForMissingT(*callExpr, migration),
+		xIdent:  ident,
+		selExpr: selector,
+		assert:  migration.importNames.funcNameFromTestifyName(ident.Name),
+	}, true
+}
+
+// update calls that use assert := assert.New(t), but make a copy of the node
+// so that unrelated calls are not modified.
+func updateCallExprForMissingT(callExpr ast.CallExpr, migration migration) *ast.CallExpr {
+	gotype := walkForType(migration.pkgInfo, callExpr.Args[0])
+	if gotype == nil {
+		callExpr.Args = append([]ast.Expr{&ast.Ident{Name: "t"}}, callExpr.Args...)
+		return &callExpr
+	}
+	switch gotype.String() {
+	case "*testing.T", "*testing.B":
+		return &callExpr
+	default:
+		fmt.Printf("Unsupported type %s %s\n", callExpr, gotype)
+	}
+
+	callExpr.Args = append([]ast.Expr{&ast.Ident{Name: "t"}}, callExpr.Args...)
+	return &callExpr
 }

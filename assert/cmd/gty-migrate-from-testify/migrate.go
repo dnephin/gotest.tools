@@ -111,11 +111,11 @@ func getReplacementAssertion(callExpr *ast.CallExpr, migration migration) ast.No
 		return nil
 	}
 
-	// TODO: not clean
 	assertionName, ok := isTestifyCall(tcall, migration)
 	if !ok {
 		return nil
 	}
+	// TODO: not clean
 	tcall.assert = assertionName
 
 	if len(tcall.expr.Args) < 2 {
@@ -178,28 +178,6 @@ func isAssignmentFromAssertNew(assign *ast.AssignStmt, migration migration) (str
 	}
 
 	return tcall.assertionName(), tcall.selExpr.Sel.Name == "New"
-}
-
-// update calls that use assert := assert.New(t), but make a copy of the node
-// so that unrelated calls are not modified.
-func updateCallExprForMissingT(callExpr ast.CallExpr) *ast.CallExpr {
-	update := func() {
-		callExpr.Args = append([]ast.Expr{&ast.Ident{Name: "t"}}, callExpr.Args...)
-	}
-
-	ident, ok := callExpr.Args[0].(*ast.Ident)
-	if !ok {
-		update()
-		return &callExpr
-	}
-
-	// TODO: fix hack
-	if ident.Name == "t" {
-		return &callExpr
-	}
-
-	update()
-	return &callExpr
 }
 
 func convertTestifySingleArgCall(tcall call) ast.Node {

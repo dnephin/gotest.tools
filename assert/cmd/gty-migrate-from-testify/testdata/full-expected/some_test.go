@@ -37,9 +37,8 @@ func TestSecondThing(t *testing.T) {
 }
 
 func TestMissed(t *testing.T) {
-	a := assert.New(t)
 
-	a.Equal(t, "a", "b")
+	assert.Check(t, cmp.Equal("a", "b"))
 }
 
 type unit struct {
