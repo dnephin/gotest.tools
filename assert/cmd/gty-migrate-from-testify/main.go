@@ -129,6 +129,7 @@ func loadProgram(opts options) (*loader.Program, error) {
 		ParserMode:  parser.ParseComments,
 		Build:       buildContext(opts),
 		AllowErrors: true,
+		FindPackage: findPackage,
 	}
 	for _, pkg := range opts.pkgs {
 		conf.ImportWithTests(pkg)

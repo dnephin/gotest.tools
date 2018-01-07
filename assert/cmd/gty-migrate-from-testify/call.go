@@ -7,6 +7,7 @@ import (
 	"go/format"
 	"go/token"
 	"log"
+	"os"
 )
 
 type call struct {
@@ -87,6 +88,8 @@ func newCallFromNode(callExpr *ast.CallExpr, migration migration) (call, bool) {
 func updateCallExprForMissingT(callExpr ast.CallExpr, migration migration) *ast.CallExpr {
 	gotype := walkForType(migration.pkgInfo, callExpr.Args[0])
 	if gotype == nil {
+		format.Node(os.Stdout, migration.fileset, &callExpr)
+		fmt.Printf(" Nil gotype\n")
 		callExpr.Args = append([]ast.Expr{&ast.Ident{Name: "t"}}, callExpr.Args...)
 		return &callExpr
 	}
@@ -94,7 +97,8 @@ func updateCallExprForMissingT(callExpr ast.CallExpr, migration migration) *ast.
 	case "*testing.T", "*testing.B":
 		return &callExpr
 	default:
-		fmt.Printf("Unsupported type %s %s\n", callExpr, gotype)
+		format.Node(os.Stdout, migration.fileset, &callExpr)
+		fmt.Printf(" Unsupported type %s\n", gotype)
 	}
 
 	callExpr.Args = append([]ast.Expr{&ast.Ident{Name: "t"}}, callExpr.Args...)
