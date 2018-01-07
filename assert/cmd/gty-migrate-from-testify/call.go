@@ -7,7 +7,6 @@ import (
 	"go/format"
 	"go/token"
 	"log"
-	"os"
 )
 
 type call struct {
@@ -83,24 +82,83 @@ func newCallFromNode(callExpr *ast.CallExpr, migration migration) (call, bool) {
 	}, true
 }
 
+// TODO: move call of updateCallExprForMissingT to this function
+func newTestifyCallFromNode(callExpr *ast.CallExpr, migration migration) (call, bool) {
+	tcall, ok := newCallFromNode(callExpr, migration)
+	if !ok {
+		return tcall, ok
+	}
+
+	assertionName, ok := isTestifyCall(tcall, migration)
+	if !ok {
+		return tcall, false
+	}
+	// TODO: not clean
+	tcall.assert = assertionName
+	return tcall, true
+}
+
+const (
+	pkgGocheck      = "github.com/go-check/check"
+	pkgGopkgGocheck = "gopkg.in/check.v1"
+)
+
 // update calls that use assert := assert.New(t), but make a copy of the node
 // so that unrelated calls are not modified.
+// TODO: check for testify.Assertions as type, instead of first arg
 func updateCallExprForMissingT(callExpr ast.CallExpr, migration migration) *ast.CallExpr {
-	gotype := walkForType(migration.pkgInfo, callExpr.Args[0])
-	if gotype == nil {
-		format.Node(os.Stdout, migration.fileset, &callExpr)
-		fmt.Printf(" Nil gotype\n")
+	update := func() *ast.CallExpr {
+		// TODO: lookup proper ident for t
 		callExpr.Args = append([]ast.Expr{&ast.Ident{Name: "t"}}, callExpr.Args...)
 		return &callExpr
+	}
+
+	if len(callExpr.Args) < 1 {
+		return &callExpr
+	}
+
+	gotype := walkForType(migration.pkgInfo, callExpr.Args[0])
+	if gotype == nil {
+		return update()
 	}
 	switch gotype.String() {
 	case "*testing.T", "*testing.B":
 		return &callExpr
-	default:
-		format.Node(os.Stdout, migration.fileset, &callExpr)
-		fmt.Printf(" Unsupported type %s\n", gotype)
+	case pkgTestifyAssert + ".TestingT", pkgGopkgTestifyAssert + ".TestingT":
+		return &callExpr
+	case pkgTestifyRequire + ".TestingT", pkgGopkgTestifyRequire + ".TestingT":
+		return &callExpr
+	case "*" + pkgGopkgGocheck + ".C", "*" + pkgGocheck + ".C":
+		return &callExpr
 	}
 
-	callExpr.Args = append([]ast.Expr{&ast.Ident{Name: "t"}}, callExpr.Args...)
-	return &callExpr
+	return update()
+}
+
+// TODO: check if type is import declaration instead of assuming import is always
+// correct
+func isTestifyCall(tcall call, migration migration) (string, bool) {
+	fromPkgName := func() (string, bool) {
+		if migration.importNames.matchesTestify(tcall.xIdent) {
+			return tcall.assertionName(), true
+		}
+		return "", false
+	}
+
+	//gotype := walkForType(migration.pkgInfo, tcall.xIdent)
+	//fmt.Printf("Type is %s\n", gotype)
+
+	if tcall.xIdent.Obj == nil {
+		return fromPkgName()
+	}
+
+	assignStmt, ok := tcall.xIdent.Obj.Decl.(*ast.AssignStmt)
+	if !ok {
+		return fromPkgName()
+	}
+
+	if assertionName, ok := isAssignmentFromAssertNew(assignStmt, migration); ok {
+		return assertionName, ok
+	}
+	return fromPkgName()
 }

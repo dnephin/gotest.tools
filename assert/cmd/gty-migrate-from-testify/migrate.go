@@ -106,46 +106,14 @@ func getReplacementTestingT(selector *ast.SelectorExpr, names importNames) ast.N
 }
 
 func getReplacementAssertion(callExpr *ast.CallExpr, migration migration) ast.Node {
-	tcall, ok := newCallFromNode(callExpr, migration)
+	tcall, ok := newTestifyCallFromNode(callExpr, migration)
 	if !ok {
 		return nil
 	}
-
-	assertionName, ok := isTestifyCall(tcall, migration)
-	if !ok {
-		return nil
-	}
-	// TODO: not clean
-	tcall.assert = assertionName
-
 	if len(tcall.expr.Args) < 2 {
 		return convertTestifySingleArgCall(tcall)
 	}
 	return convertTestifyAssertion(tcall, migration)
-}
-
-// TODO: hacky without testify loaded
-func isTestifyCall(tcall call, migration migration) (string, bool) {
-	fromPkgName := func() (string, bool) {
-		if migration.importNames.matchesTestify(tcall.xIdent) {
-			return tcall.assertionName(), true
-		}
-		return "", false
-	}
-
-	if tcall.xIdent.Obj == nil {
-		return fromPkgName()
-	}
-
-	assignStmt, ok := tcall.xIdent.Obj.Decl.(*ast.AssignStmt)
-	if !ok {
-		return fromPkgName()
-	}
-
-	if assertionName, ok := isAssignmentFromAssertNew(assignStmt, migration); ok {
-		return assertionName, ok
-	}
-	return fromPkgName()
 }
 
 func getReplacementAssignment(assign *ast.AssignStmt, migration migration) ast.Node {
@@ -155,6 +123,7 @@ func getReplacementAssignment(assign *ast.AssignStmt, migration migration) ast.N
 	return nil
 }
 
+// TODO: use pkgInfo and walkForType instead?
 func isAssignmentFromAssertNew(assign *ast.AssignStmt, migration migration) (string, bool) {
 	if len(assign.Rhs) != 1 {
 		return "", false
