@@ -203,10 +203,11 @@ package foo
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSomething(t *testing.T) {
-	assert := assert.New(t)
+	assert := require.New(t)
 
 	assert.Equal("one", "two")
 	assert.NotEqual("one", "two")
@@ -230,8 +231,8 @@ import (
 
 func TestSomething(t *testing.T) {
 
-	assert.Check(t, cmp.Equal("one", "two"))
-	assert.Check(t, "one" != "two")
+	assert.Assert(t, cmp.Equal("one", "two"))
+	assert.Assert(t, "one" != "two")
 
 	assert.Check(t, cmp.Equal("one", "two"))
 	assert.Check(t, "one" != "two")
