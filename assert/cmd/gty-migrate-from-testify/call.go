@@ -122,7 +122,7 @@ func updateCallExprForMissingT(callExpr ast.CallExpr, migration migration) *ast.
 		return update()
 	}
 	switch gotype.String() {
-	case "*testing.T", "*testing.B":
+	case "*testing.T", "*testing.B", "testing.TB":
 		return &callExpr
 	case pkgTestifyAssert + ".TestingT", pkgGopkgTestifyAssert + ".TestingT":
 		return &callExpr
