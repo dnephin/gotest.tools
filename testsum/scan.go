@@ -1,38 +1,5 @@
-/*Package testsum is DEPRECATED.
-
-This functionality is now available from `go tool test2json` in the stdlib.
-
-Package testsum provides functions for parsing `go test -v` output and returning
-a summary of the test run.
-
-Build the executable:
-
-    go build -o gotestsum ./testsum/cmd
-
-Usage:
-
-    go test -v ./... | gotestsum
-
-Example output:
-
-    === RUN   TestPass
-    --- PASS: TestPass (0.00s)
-    === RUN   TestSkip
-    --- SKIP: TestSkip (0.00s)
-            example_test.go:11:
-    === RUN   TestFail
-    Some test output
-    --- FAIL: TestFail (0.00s)
-            example_test.go:22: some log output
-    FAIL
-    exit status 1
-    FAIL    example.com/gotestyourself/testpkg        0.002s
-    ======== 3 tests, 1 skipped, 1 failed in 2.28 seconds ========
-    --- FAIL: TestFail
-    Some test output
-
-            example_test.go:22: some log output
-*/
+/*Package testsum is DEPRECATED. Use `go tool test2json`
+ */
 package testsum
 
 import (
