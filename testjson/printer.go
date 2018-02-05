@@ -3,6 +3,10 @@ package testjson
 import (
 	"bytes"
 	"fmt"
+	"go/build"
+	"log"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -19,45 +23,104 @@ func debugEvent(event TestEvent, _ *Execution) error {
 	return nil
 }
 
-func standardVerboseEvent(event TestEvent, _ *Execution) error {
+// go test -v
+func standardVerboseFormat(event TestEvent, _ *Execution) error {
 	if event.Action == ActionOutput && event.Test != "" {
 		fmt.Print(event.Output)
 	}
 	return nil
 }
 
-func standardQuietEvent(event TestEvent, _ *Execution) error {
-	if event.Action == ActionOutput && event.Test == "" {
+// go test
+func standardQuietFormat(event TestEvent, _ *Execution) error {
+	if isPackageEndEvent(event) {
 		fmt.Print(event.Output)
 	}
 	return nil
 }
 
-func summarizedPackageOutput(event TestEvent, exec *Execution) error {
-	if event.Action == ActionOutput && event.Test != "" {
-		pkg := exec.packages[event.Package]
-		fmt.Printf("%s  Total=%d Failed=%d\n",
-			event.Output, pkg.run, len(pkg.failed))
+func summaryPackageFormat(event TestEvent, exec *Execution) error {
+	if !isPackageEndEvent(event) {
+		return nil
 	}
 
+	pkg := exec.packages[event.Package]
+	switch {
+	case pkg.run == 0:
+		fmt.Printf("%s [no test files]\n", event.Package)
+	default:
+		fmt.Printf("%s Total=%d Failed=%d\n",
+			event.Package, pkg.run, len(pkg.failed))
+	}
+	return nil
+}
+
+func isPackageEndEvent(event TestEvent) bool {
+	if event.Action != ActionOutput || event.Test != "" {
+		return false
+	}
+	return strings.HasPrefix(event.Output, "ok ") || strings.HasPrefix(event.Output, "? ")
+}
+
+// TODO: fix
+func testDotsFormat(event TestEvent, exec *Execution) error {
+	pkg := exec.Package(event)
+
+	switch {
+	case event.Action == ActionRun && pkg.run == 1:
+		fmt.Print(relativePackagePath(event.Package) + " ")
+	case event.Action == ActionPass:
+		fmt.Print(".")
+	case event.Action == ActionFail:
+		fmt.Print("x")
+	case isPackageEndEvent(event):
+		fmt.Println()
+	}
 	return nil
 }
 
 func PrintExecution(execution *Execution) error {
-	fmt.Printf("%+v\n", execution)
+	// TODO: only show failed if != 0
+	// TODO: show skipped
+	fmt.Printf("Summary: Total %d Failed %d (%v)\n",
+		execution.Total(),
+		len(execution.Failed()),
+		execution.Elapsed())
 	return nil
 }
+
+// TODO: print failed test summary
+// TODO: test data with: failed, skipped, empty package, parallel, subtests
+
+func relativePackagePath(pkgpath string) string {
+	return strings.TrimPrefix(pkgpath, pkgPathPrefix)
+}
+
+// TODO: might not work on windows
+func getPkgPathPrefix() string {
+	cwd, _ := os.Getwd()
+	gopaths := strings.Split(build.Default.GOPATH, string(filepath.ListSeparator))
+	for _, gopath := range gopaths {
+		gosrcpath := gopath + "/src/"
+		if strings.HasPrefix(cwd, gosrcpath) {
+			return strings.TrimPrefix(cwd, gosrcpath) + "/"
+		}
+	}
+	return ""
+}
+
+var pkgPathPrefix = getPkgPathPrefix()
 
 func NewHandler(formats []string) HandleEvent {
 	if len(formats) == 0 {
 		// TODO: better default
-		return standardVerboseEvent
+		return standardVerboseFormat
 	}
 	handlers := []HandleEvent{}
 	for _, format := range formats {
 		handler := handlersFromFormat(format)
 		if handler == nil {
-			// TODO: error?
+			log.Printf("unknown format %s", format)
 			continue
 		}
 		handlers = append(handlers, handler)
@@ -73,11 +136,13 @@ func handlersFromFormat(format string) HandleEvent {
 	case "debug":
 		return debugEvent
 	case "standard":
-		return standardVerboseEvent
+		return standardVerboseFormat
 	case "quiet":
-		return standardQuietEvent
+		return standardQuietFormat
 	case "summary":
-		return summarizedPackageOutput
+		return summaryPackageFormat
+	case "dots":
+		return testDotsFormat
 	default:
 		return nil
 	}

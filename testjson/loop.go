@@ -97,8 +97,28 @@ func (e *Execution) Output(event TestEvent) string {
 	return output.String()
 }
 
+func (e *Execution) Package(event TestEvent) *Package {
+	return e.packages[event.Package]
+}
+
 func (e *Execution) Elapsed() time.Duration {
 	return time.Now().Sub(e.started)
+}
+
+func (e *Execution) Failed() []TestEvent {
+	failed := []TestEvent{}
+	for _, pkg := range e.packages {
+		failed = append(failed, pkg.failed...)
+	}
+	return failed
+}
+
+func (e *Execution) Total() int {
+	total := 0
+	for _, pkg := range e.packages {
+		total += pkg.run
+	}
+	return total
 }
 
 func NewExecution() *Execution {
@@ -179,5 +199,6 @@ func Run(opts *Options) error {
 	if err := PrintExecution(exec); err != nil {
 		return err
 	}
+	// TODO: return errNonZeroExit instead of "exit status 1"
 	return proc.cmd.Wait()
 }
