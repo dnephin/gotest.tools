@@ -9,23 +9,18 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type options struct {
-	quiet            bool
-	hideFailureRecap bool
-	hideRunSummary   bool
-}
-
+// TODO: unused
 var errNonZeroExit = errors.New("")
 
 func main() {
 	name := os.Args[0]
 	flags, opts := setupFlags(name)
 	handleExitError(name, flags.Parse(os.Args[1:]))
-	handleExitError(name, run(opts))
+	handleExitError(name, testjson.Run(opts))
 }
 
-func setupFlags(name string) (*pflag.FlagSet, options) {
-	opts := options{}
+func setupFlags(name string) (*pflag.FlagSet, *testjson.Options) {
+	opts := &testjson.Options{}
 	flags := pflag.NewFlagSet(name, pflag.ContinueOnError)
 	// TODO: set usage func to print more usage
 	//flags.BoolVarP(&opts.quiet, "quiet", "q", false,
@@ -34,11 +29,9 @@ func setupFlags(name string) (*pflag.FlagSet, options) {
 	//	"do not print a recap of test failures")
 	//flags.BoolVar(&opts.hideRunSummary, "hide-summary", false,
 	//	"do not print test summary")
+	flags.StringSliceVar(&opts.Format, "format", nil,
+		"print format of test input")
 	return flags, opts
-}
-
-func run(opts options) error {
-	return testjson.Run()
 }
 
 //func getEchoWrite(quiet bool) io.Writer {

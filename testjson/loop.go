@@ -25,6 +25,7 @@ const (
 	ActionBench  Action = "bench"
 	ActionFail   Action = "fail"
 	ActionOutput Action = "output"
+	ActionSkip   Action = "skip"
 )
 
 // TestEvent is a structure output by go tool test2json and go test -json.
@@ -45,7 +46,7 @@ type TestEvent struct {
 type Package struct {
 	run    int
 	failed []TestEvent
-	passed []time.Duration
+	//passed []time.Duration
 	output map[string]*bytes.Buffer
 }
 
@@ -61,6 +62,7 @@ type Execution struct {
 	packages map[string]*Package
 }
 
+// TODO: detect skipped tests
 func (e *Execution) add(event TestEvent) {
 	pkg, ok := e.packages[event.Package]
 	if !ok {
@@ -71,7 +73,7 @@ func (e *Execution) add(event TestEvent) {
 	case ActionRun:
 		pkg.run += 1
 	case ActionPass:
-		pkg.passed = append(pkg.passed, testDuration(event))
+		//pkg.passed = append(pkg.passed, testDuration(event))
 	case ActionFail:
 		pkg.failed = append(pkg.failed, event)
 	case ActionOutput, ActionBench:
@@ -88,7 +90,11 @@ func testDuration(event TestEvent) time.Duration {
 }
 
 func (e *Execution) Output(event TestEvent) string {
-	return e.packages[event.Package].output[event.Test].String()
+	output := e.packages[event.Package].output[event.Test]
+	if output == nil {
+		return ""
+	}
+	return output.String()
 }
 
 func (e *Execution) Elapsed() time.Duration {
@@ -102,7 +108,9 @@ func NewExecution() *Execution {
 	}
 }
 
-func ScanTestOutput(in io.Reader, out Printer) (*Execution, error) {
+type HandleEvent func(event TestEvent, output *Execution) error
+
+func ScanTestOutput(in io.Reader, handler HandleEvent) (*Execution, error) {
 	execution := NewExecution()
 	scanner := bufio.NewScanner(in)
 
@@ -112,7 +120,8 @@ func ScanTestOutput(in io.Reader, out Printer) (*Execution, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to parse test output: %s", string(raw))
 		}
-		if err := out.PrintEvent(event, execution.Output(event)); err != nil {
+		execution.add(event)
+		if err := handler(event, execution); err != nil {
 			return nil, err
 		}
 	}
@@ -148,7 +157,11 @@ func prepend(first string, rest ...string) []string {
 	return append([]string{first}, rest...)
 }
 
-func Run() error {
+type Options struct {
+	Format []string
+}
+
+func Run(opts *Options) error {
 	// TODO: args
 	args := []string{"-json", "./..."}
 	proc, err := StartGoTest(args)
@@ -157,12 +170,13 @@ func Run() error {
 			proc.cmd.Path,
 			strings.Join(proc.cmd.Args, " "))
 	}
-	printer := NewPrinter()
+	printer := NewHandler(opts.Format)
 	exec, err := ScanTestOutput(proc.stdout, printer)
 	if err != nil {
 		return err
 	}
-	if err := printer.PrintExecution(*exec); err != nil {
+	// TODO: make an interface based on format
+	if err := PrintExecution(exec); err != nil {
 		return err
 	}
 	return proc.cmd.Wait()
