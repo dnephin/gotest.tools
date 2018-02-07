@@ -52,7 +52,7 @@ job=lint:
 job=binary-testsum:
   use: builder
   mounts: [source]
-  command: scripts/binary-testsum
+  command: scripts/binary-gotestsum
 
 alias=test:
   tasks: [test-unit]

@@ -5,9 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"os"
-	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -40,6 +37,11 @@ type TestEvent struct {
 	Elapsed float64
 	// Output of test or benchmark
 	Output string
+}
+
+// PackageEvent returns true if the event is a package start or end event
+func (e TestEvent) PackageEvent() bool {
+	return e.Test == ""
 }
 
 // Package is the set of TestEvents for a single go package
@@ -152,53 +154,4 @@ func parseEvent(raw []byte) (TestEvent, error) {
 	event := TestEvent{}
 	err := json.Unmarshal(raw, &event)
 	return event, err
-}
-
-type proc struct {
-	cmd    *exec.Cmd
-	stdout io.Reader
-}
-
-func StartGoTest(args []string) (proc, error) {
-	p := proc{
-		cmd: exec.Command("go", prepend("test", args...)...),
-	}
-	// TODO: how to link stderr to a test?
-	p.cmd.Stderr = os.Stderr
-	var err error
-	p.stdout, err = p.cmd.StdoutPipe()
-	if err != nil {
-		return p, err
-	}
-	return p, p.cmd.Start()
-}
-
-func prepend(first string, rest ...string) []string {
-	return append([]string{first}, rest...)
-}
-
-type Options struct {
-	Format []string
-}
-
-func Run(opts *Options) error {
-	// TODO: args
-	args := []string{"-json", "./..."}
-	proc, err := StartGoTest(args)
-	if err != nil {
-		return errors.Wrapf(err, "failed to run %s %s",
-			proc.cmd.Path,
-			strings.Join(proc.cmd.Args, " "))
-	}
-	printer := NewHandler(opts.Format)
-	exec, err := ScanTestOutput(proc.stdout, printer)
-	if err != nil {
-		return err
-	}
-	// TODO: make an interface based on format
-	if err := PrintExecution(exec); err != nil {
-		return err
-	}
-	// TODO: return errNonZeroExit instead of "exit status 1"
-	return proc.cmd.Wait()
 }

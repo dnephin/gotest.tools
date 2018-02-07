@@ -13,6 +13,7 @@ import (
 
 	"github.com/gotestyourself/gotestyourself/assert"
 	"github.com/gotestyourself/gotestyourself/assert/cmp"
+	"github.com/gotestyourself/gotestyourself/internal/cmd"
 )
 
 type helperT interface {
@@ -182,7 +183,7 @@ func (r *Result) setExitError(err error) {
 		return
 	}
 	r.Error = err
-	r.ExitCode = processExitCode(err)
+	r.ExitCode = cmd.ExitCodeWithDefault(err)
 }
 
 // Cmd contains the arguments and options for a process to run as part of a test

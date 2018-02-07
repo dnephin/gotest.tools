@@ -13,7 +13,7 @@ import (
 )
 
 func debugEvent(event TestEvent, _ *Execution) error {
-	fmt.Printf("%s:%s %s (%.3f) [%d] %s\n",
+	fmt.Printf("%s %s %s (%.3f) [%d] %s\n",
 		event.Package,
 		event.Test,
 		event.Action,
@@ -25,7 +25,7 @@ func debugEvent(event TestEvent, _ *Execution) error {
 
 // go test -v
 func standardVerboseFormat(event TestEvent, _ *Execution) error {
-	if event.Action == ActionOutput && event.Test != "" {
+	if event.Action == ActionOutput && !event.PackageEvent() {
 		fmt.Print(event.Output)
 	}
 	return nil
@@ -39,6 +39,23 @@ func standardQuietFormat(event TestEvent, _ *Execution) error {
 	return nil
 }
 
+// TODO: handler that only shows output of failed tests
+//func allTestsFormat(event TestEvent, _ *Execution) error {
+//	if event.Test == "" {
+//		return nil
+//	}
+//
+//	switch event.Action {
+//	case ActionRun:
+//
+//	}
+//	fmt.Printf("%s %s",
+//		relativePackagePath(event.Package),
+//		event.Test)
+//	}
+//	return nil
+//}
+
 func summaryPackageFormat(event TestEvent, exec *Execution) error {
 	if !isPackageEndEvent(event) {
 		return nil
@@ -47,22 +64,31 @@ func summaryPackageFormat(event TestEvent, exec *Execution) error {
 	pkg := exec.packages[event.Package]
 	switch {
 	case pkg.run == 0:
-		fmt.Printf("%s [no test files]\n", event.Package)
+		fmt.Printf("%s [no tests]\n", relativePackagePath(event.Package))
 	default:
-		fmt.Printf("%s Total=%d Failed=%d\n",
-			event.Package, pkg.run, len(pkg.failed))
+		fmt.Printf("%s [%d tests%s]\n",
+			relativePackagePath(event.Package),
+			pkg.run, // TODO: count can be off because of parallel runs?
+			formatFailedCount(len(pkg.failed), " %d failed"))
 	}
 	return nil
 }
 
+func formatFailedCount(count int, format string) string {
+	if count == 0 {
+		return ""
+	}
+	return fmt.Sprintf(format, count)
+}
+
 func isPackageEndEvent(event TestEvent) bool {
-	if event.Action != ActionOutput || event.Test != "" {
+	if event.Action != ActionOutput || !event.PackageEvent() {
 		return false
 	}
 	return strings.HasPrefix(event.Output, "ok ") || strings.HasPrefix(event.Output, "? ")
 }
 
-// TODO: fix
+// TODO: fix newlines
 func testDotsFormat(event TestEvent, exec *Execution) error {
 	pkg := exec.Package(event)
 
@@ -93,7 +119,10 @@ func PrintExecution(execution *Execution) error {
 // TODO: test data with: failed, skipped, empty package, parallel, subtests
 
 func relativePackagePath(pkgpath string) string {
-	return strings.TrimPrefix(pkgpath, pkgPathPrefix)
+	if pkgpath == pkgPathPrefix {
+		return "."
+	}
+	return strings.TrimPrefix(pkgpath, pkgPathPrefix+"/")
 }
 
 // TODO: might not work on windows
@@ -103,7 +132,7 @@ func getPkgPathPrefix() string {
 	for _, gopath := range gopaths {
 		gosrcpath := gopath + "/src/"
 		if strings.HasPrefix(cwd, gosrcpath) {
-			return strings.TrimPrefix(cwd, gosrcpath) + "/"
+			return strings.TrimPrefix(cwd, gosrcpath)
 		}
 	}
 	return ""
@@ -111,7 +140,7 @@ func getPkgPathPrefix() string {
 
 var pkgPathPrefix = getPkgPathPrefix()
 
-func NewHandler(formats []string) HandleEvent {
+func NewEventHandler(formats []string) HandleEvent {
 	if len(formats) == 0 {
 		// TODO: better default
 		return standardVerboseFormat
