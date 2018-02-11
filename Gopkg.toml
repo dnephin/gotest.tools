@@ -14,3 +14,7 @@
 [[constraint]]
   branch = "master"
   name = "golang.org/x/tools"
+
+[[constraint]]
+  name = "github.com/jonboulle/clockwork"
+  version = "0.1.0"

@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"go/build"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -40,6 +42,7 @@ func standardQuietFormat(event TestEvent, _ *Execution) (string, error) {
 
 func condensedFormat(event TestEvent, exec *Execution) (string, error) {
 	switch {
+	// TODO: include elapsed time in package events?
 	case event.Action == ActionSkip && event.PackageEvent():
 		return "EMPTY " + relativePackagePath(event.Package) + "\n", nil
 	case event.Action == ActionPass && event.PackageEvent():
@@ -74,6 +77,8 @@ func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 	pkg := exec.Package(event)
 
 	switch {
+	case event.PackageEvent():
+		return "", nil
 	case event.Action == ActionRun && pkg.run == 1:
 		return "[" + relativePackagePath(event.Package) + "]", nil
 	case event.Action == ActionPass:
@@ -84,13 +89,18 @@ func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 	return "", nil
 }
 
-func PrintExecution(execution *Execution) error {
-	// TODO: only show failed if != 0
-	// TODO: show skipped
-	fmt.Printf("Summary: Total %d Failed %d (%v)\n",
+// TODO: show skipped
+func PrintExecution(out io.Writer, execution *Execution) error {
+	failed := execution.Failed()
+	fmt.Fprintf(out, "\nDONE %d tests%s in %s\n",
 		execution.Total(),
-		len(execution.Failed()),
-		execution.Elapsed())
+		formatFailedCount(len(failed), " with %d failure(s)"),
+		formatDuration(execution.Elapsed()))
+
+	// TODO: include package name in failure summary
+	for _, failure := range failed {
+		fmt.Fprintf(out, execution.Output(failure))
+	}
 	return nil
 }
 
@@ -99,6 +109,10 @@ func formatFailedCount(count int, format string) string {
 		return ""
 	}
 	return fmt.Sprintf(format, count)
+}
+
+func formatDuration(d time.Duration) string {
+	return fmt.Sprintf("%.3fs", float64(d.Nanoseconds()/1000000)/1000)
 }
 
 // TODO: print failed test summary

@@ -71,13 +71,14 @@ func run(opts *options) error {
 	}
 	defer goTestProc.cancel()
 
+	out := os.Stdout
 	handler := testjson.NewEventHandler(opts.format)
-	exec, err := testjson.ScanTestOutput(goTestProc.stdout, os.Stdout, handler)
+	exec, err := testjson.ScanTestOutput(goTestProc.stdout, out, handler)
 	if err != nil {
 		return err
 	}
 	// TODO: make an interface based on a --summary flag
-	if err := testjson.PrintExecution(exec); err != nil {
+	if err := testjson.PrintExecution(out, exec); err != nil {
 		return err
 	}
 	return goTestProc.cmd.Wait()

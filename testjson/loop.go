@@ -8,6 +8,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/jonboulle/clockwork"
 	"github.com/pkg/errors"
 )
 
@@ -77,6 +78,10 @@ func (e *Execution) add(event TestEvent) {
 		pkg = newPackage()
 		e.packages[event.Package] = pkg
 	}
+	if event.PackageEvent() {
+		return
+	}
+
 	switch event.Action {
 	case ActionRun:
 		pkg.run += 1
@@ -110,8 +115,10 @@ func (e *Execution) Package(event TestEvent) *Package {
 	return e.packages[event.Package]
 }
 
+var clock = clockwork.NewRealClock()
+
 func (e *Execution) Elapsed() time.Duration {
-	return time.Now().Sub(e.started)
+	return clock.Now().Sub(e.started)
 }
 
 func (e *Execution) Failed() []TestEvent {
