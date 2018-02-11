@@ -115,6 +115,9 @@ func formatDuration(d time.Duration) string {
 	return fmt.Sprintf("%.3fs", float64(d.Nanoseconds()/1000000)/1000)
 }
 
+// TODO: print failed test summary
+// TODO: test data with: failed, skipped, empty package, parallel, subtests
+
 func relativePackagePath(pkgpath string) string {
 	if pkgpath == pkgPathPrefix {
 		return "."
