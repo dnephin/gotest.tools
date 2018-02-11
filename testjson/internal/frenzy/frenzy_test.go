@@ -1,4 +1,4 @@
-// +build stubpkg
+// +build stubpkg,panicstub
 
 package frenzy
 

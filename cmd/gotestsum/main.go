@@ -118,6 +118,7 @@ func startGoTest(ctx context.Context, args []string, debug bool) (proc, error) {
 	if debug {
 		log.Printf("%s", p.cmd.Args)
 	}
+	// TODO: must capture stderr to detect failure to build a package
 	// TODO: how to link stderr to a test?
 	p.cmd.Stderr = os.Stderr
 	var err error

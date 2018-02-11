@@ -1,104 +1,42 @@
-EMPTY .
---- PASS assert/cmp TestDeepEqual (0.00)
---- PASS assert/cmp TestDeepEqualeWithUnexported (0.00)
---- PASS assert/cmp TestLen/[A_b_c]_len=3 (0.00)
---- PASS assert/cmp TestLen/[A_b_c]_len=2 (0.00)
---- PASS assert/cmp TestLen/map[a:1_b:2]_len=2 (0.00)
---- PASS assert/cmp TestLen/[a_b_c]_len=3 (0.00)
---- PASS assert/cmp TestLen/abcd_len=4 (0.00)
---- PASS assert/cmp TestLen/abcd_len=3 (0.00)
---- PASS assert/cmp TestLen (0.00)
---- PASS assert/cmp TestPanics (0.00)
---- PASS assert/cmp TestDeepEqualEquivalenceToReflectDeepEqual (0.00)
---- PASS assert/cmp TestContains/0_in_<nil> (0.00)
---- PASS assert/cmp TestContains/cde_in_abcdef (0.00)
---- PASS assert/cmp TestContains/foo_in_abcdef (0.00)
---- PASS assert/cmp TestContains/3_in_abcdef (0.00)
---- PASS assert/cmp TestContains/98_in_map[97:1_98:2] (0.00)
---- PASS assert/cmp TestContains/99_in_map[97:1] (0.00)
---- PASS assert/cmp TestContains/98_in_map[97:1_98:2]#01 (0.00)
---- PASS assert/cmp TestContains/97_in_[a_1_97_1_true] (0.00)
---- PASS assert/cmp TestContains/3_in_[a_1_97_1_true] (0.00)
---- PASS assert/cmp TestContains/99_in_[99_10_100] (0.00)
---- PASS assert/cmp TestContains/98_in_[99_10_100] (0.00)
---- PASS assert/cmp TestContains (0.00)
---- PASS assert/cmp TestEqualMultiLine (0.00)
---- PASS assert/cmp TestError (0.00)
---- PASS assert/cmp TestErrorContains (0.00)
---- PASS assert/cmp TestNil (0.00)
-PASS assert/cmp
---- PASS internal/source TestGetConditionSingleLine (0.00)
---- PASS internal/source TestGetConditionMultiLine (0.00)
---- PASS internal/source TestGetConditionIfStatement (0.00)
---- PASS env TestPatchFromUnset (0.00)
---- PASS env TestPatch (0.00)
---- PASS env TestPatchAll (0.00)
---- PASS env TestToMap (0.00)
---- PASS golden TestGoldenGetInvalidFile (0.00)
---- PASS poll TestWaitOn (0.00)
---- PASS poll TestWaitOnWithTimeout (0.00)
---- PASS poll TestWaitOnWithCheckTimeout (0.00)
---- PASS poll TestWaitOnWithCheckError (0.00)
---- PASS assert TestAssertWithBoolFailure (0.00)
---- PASS assert TestAssertWithBoolFailureNotEqual (0.00)
---- PASS assert TestAssertWithBoolFailureNotTrue (0.00)
---- PASS assert TestAssertWithBoolFailureAndExtraMessage (0.00)
---- PASS assert TestAssertWithBoolSuccess (0.00)
---- PASS assert TestAssertWithBoolMultiLineFailure (0.00)
---- PASS assert TestAssertWithComparisonSuccess (0.00)
---- PASS assert TestAssertWithComparisonFailure (0.00)
---- PASS assert TestAssertWithComparisonAndExtraMessage (0.00)
---- PASS assert TestNilErrorSuccess (0.00)
---- PASS assert TestNilErrorFailure (0.00)
---- PASS assert TestCheckFailure (0.00)
---- PASS assert TestCheckSuccess (0.00)
---- PASS assert TestCheckEqualFailure (0.00)
---- PASS assert TestEqualSuccess (0.00)
---- PASS assert TestEqualFailure (0.00)
---- PASS assert TestEqualFailureTypes (0.00)
---- PASS assert TestEqualFailureWithSelectorArgument (0.00)
---- PASS assert TestEqualFailureWithIndexExpr (0.00)
-PASS env
---- PASS assert TestEqualFailureWithCallExprArgument (0.00)
---- PASS skip TestIfCondition (0.00)
---- PASS assert TestAssertFailureWithOfflineComparison (0.00)
---- PASS skip TestIfConditionWithMessage (0.00)
---- PASS skip TestIfConditionMultiline (0.00)
---- PASS skip TestIfConditionMultilineWithMessage (0.00)
---- PASS skip TestIfConditionNoSkip (0.00)
---- PASS skip TestIf (0.00)
---- PASS skip TestIfWithMessage (0.00)
-PASS skip
-PASS internal/source
-PASS assert
-EMPTY assert/cmd/goast-debug
-EMPTY cmd/gotestsum
---- PASS icmd TestRunCommandSuccess (0.07)
---- PASS icmd TestRunCommandWithCombined (0.00)
---- PASS icmd TestRunCommandWithTimeoutFinished (0.00)
-PASS poll
---- PASS fs TestFromDir (0.05)
-PASS fs
---- PASS golden TestGoldenGetAbsolutePath (0.13)
---- PASS golden TestGoldenGet (0.11)
---- PASS testsum TestScanNoFailures (0.00)
---- PASS testsum TestScanWithFailure (0.00)
---- PASS testsum TestScanWithNested (0.00)
---- PASS testsum TestScanWithNestedFailures (0.00)
---- PASS testsum TestSummaryFormatLine (0.00)
-PASS testsum
---- PASS golden TestGoldenAssertInvalidContent (0.06)
---- PASS testjson TestRelativePackagePath (0.00)
---- PASS testjson TestGetPkgPathPrefix (0.00)
---- PASS golden TestGoldenAssertInvalidContentUpdate (0.02)
---- PASS golden TestGoldenAssert (0.00)
---- PASS golden TestGoldenAssertBytes (0.00)
-PASS testjson
-PASS golden
---- PASS icmd TestRunCommandWithTimeoutKilled (1.25)
---- PASS icmd TestRunCommandWithErrors (0.00)
---- PASS icmd TestRunCommandWithStdoutStderr (0.00)
---- PASS icmd TestRunCommandWithStdoutStderrError (0.01)
-PASS icmd
-EMPTY internal/cmd
-EMPTY internal/format
+--- PASS testjson/internal/frenzy TestPassed (0.00)
+--- PASS testjson/internal/frenzy TestPassedWithLog (0.00)
+--- PASS testjson/internal/frenzy TestPassedWithStdout (0.00)
+--- PASS testjson/internal/stub TestPassed (0.00)
+--- PASS testjson/internal/stub TestPassedWithLog (0.00)
+--- PASS testjson/internal/stub TestPassedWithStdout (0.00)
+=== RUN   TestFailed
+--- FAIL: TestFailed (0.00s)
+	stub_test.go:33: this failed
+--- FAIL testjson/internal/stub TestFailed (0.00)
+=== RUN   TestPanics
+--- FAIL: TestPanics (0.00s)
+panic: this is a panic [recovered]
+	panic: this is a panic
+
+goroutine 8 [running]:
+testing.tRunner.func1(0xc4200a83c0)
+	/usr/local/go/src/testing/testing.go:742 +0x29d
+panic(0x4fedc0, 0x546780)
+	/usr/local/go/src/runtime/panic.go:505 +0x229
+github.com/gotestyourself/gotestyourself/testjson/internal/frenzy.TestPanics(0xc4200a83c0)
+	/go/src/github.com/gotestyourself/gotestyourself/testjson/internal/frenzy/frenzy_test.go:21 +0x39
+testing.tRunner(0xc4200a83c0, 0x537678)
+	/usr/local/go/src/testing/testing.go:777 +0xd0
+created by testing.(*T).Run
+	/usr/local/go/src/testing/testing.go:824 +0x2e0
+FAIL	github.com/gotestyourself/gotestyourself/testjson/internal/frenzy	0.003s
+--- FAIL testjson/internal/frenzy TestPanics (0.00)
+--- PASS testjson/internal/stub TestWithStderr (0.00)
+--- PASS testjson/internal/stub TestNested/a/sub (0.00)
+--- PASS testjson/internal/stub TestNested/a (0.00)
+--- PASS testjson/internal/stub TestNested/b/sub (0.00)
+--- PASS testjson/internal/stub TestNested/b (0.00)
+--- PASS testjson/internal/stub TestNested/c/sub (0.00)
+--- PASS testjson/internal/stub TestNested/c (0.00)
+--- PASS testjson/internal/stub TestNested/d/sub (0.00)
+--- PASS testjson/internal/stub TestNested/d (0.00)
+--- PASS testjson/internal/stub TestNested (0.00)
+--- PASS testjson/internal/stub TestParallelTheThird (0.00)
+--- PASS testjson/internal/stub TestParallelTheSecond (0.01)
+--- PASS testjson/internal/stub TestParallelTheFirst (0.01)
+FAIL testjson/internal/stub
