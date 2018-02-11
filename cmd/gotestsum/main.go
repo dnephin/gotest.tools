@@ -72,7 +72,7 @@ func run(opts *options) error {
 	defer goTestProc.cancel()
 
 	handler := testjson.NewEventHandler(opts.format)
-	exec, err := testjson.ScanTestOutput(goTestProc.stdout, handler)
+	exec, err := testjson.ScanTestOutput(goTestProc.stdout, os.Stdout, handler)
 	if err != nil {
 		return err
 	}

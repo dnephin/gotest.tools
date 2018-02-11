@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 
@@ -42,6 +43,11 @@ type TestEvent struct {
 // PackageEvent returns true if the event is a package start or end event
 func (e TestEvent) PackageEvent() bool {
 	return e.Test == ""
+}
+
+// ElapsedFormatted returns Elapsed formatted in the go test format, ex (0.00s).
+func (e TestEvent) ElapsedFormatted() string {
+	return fmt.Sprintf("(%.2f)", e.Elapsed)
 }
 
 // Package is the set of TestEvents for a single go package
@@ -91,6 +97,7 @@ func testDuration(event TestEvent) time.Duration {
 	return time.Duration(event.Elapsed*1000) * time.Millisecond
 }
 
+// Output returns the full test output for a test.
 func (e *Execution) Output(event TestEvent) string {
 	output := e.packages[event.Package].output[event.Test]
 	if output == nil {
@@ -130,9 +137,9 @@ func NewExecution() *Execution {
 	}
 }
 
-type HandleEvent func(event TestEvent, output *Execution) error
+type HandleEvent func(event TestEvent, output *Execution) (string, error)
 
-func ScanTestOutput(in io.Reader, handler HandleEvent) (*Execution, error) {
+func ScanTestOutput(in io.Reader, out io.Writer, handler HandleEvent) (*Execution, error) {
 	execution := NewExecution()
 	scanner := bufio.NewScanner(in)
 
@@ -143,9 +150,11 @@ func ScanTestOutput(in io.Reader, handler HandleEvent) (*Execution, error) {
 			return nil, errors.Wrapf(err, "failed to parse test output: %s", string(raw))
 		}
 		execution.add(event)
-		if err := handler(event, execution); err != nil {
+		line, err := handler(event, execution)
+		if err != nil {
 			return nil, err
 		}
+		out.Write([]byte(line))
 	}
 	return execution, errors.Wrap(scanner.Err(), "failed to scan test output")
 }

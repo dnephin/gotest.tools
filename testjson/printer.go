@@ -12,73 +12,55 @@ import (
 	"github.com/pkg/errors"
 )
 
-func debugEvent(event TestEvent, _ *Execution) error {
-	fmt.Printf("%s %s %s (%.3f) [%d] %s\n",
+func debugFormat(event TestEvent, _ *Execution) (string, error) {
+	return fmt.Sprintf("%s %s %s (%.3f) [%d] %s\n",
 		event.Package,
 		event.Test,
 		event.Action,
 		event.Elapsed,
 		event.Time.Unix(),
-		event.Output)
-	return nil
+		event.Output), nil
 }
 
 // go test -v
-func standardVerboseFormat(event TestEvent, _ *Execution) error {
+func standardVerboseFormat(event TestEvent, _ *Execution) (string, error) {
 	if event.Action == ActionOutput && !event.PackageEvent() {
-		fmt.Print(event.Output)
+		return event.Output, nil
 	}
-	return nil
+	return "", nil
 }
 
 // go test
-func standardQuietFormat(event TestEvent, _ *Execution) error {
+func standardQuietFormat(event TestEvent, _ *Execution) (string, error) {
 	if isPackageEndEvent(event) {
-		fmt.Print(event.Output)
+		return event.Output, nil
 	}
-	return nil
+	return "", nil
 }
 
-// TODO: handler that only shows output of failed tests
-//func allTestsFormat(event TestEvent, _ *Execution) error {
-//	if event.Test == "" {
-//		return nil
-//	}
-//
-//	switch event.Action {
-//	case ActionRun:
-//
-//	}
-//	fmt.Printf("%s %s",
-//		relativePackagePath(event.Package),
-//		event.Test)
-//	}
-//	return nil
-//}
-
-func summaryPackageFormat(event TestEvent, exec *Execution) error {
-	if !isPackageEndEvent(event) {
-		return nil
-	}
-
-	pkg := exec.packages[event.Package]
+func condensedFormat(event TestEvent, exec *Execution) (string, error) {
 	switch {
-	case pkg.run == 0:
-		fmt.Printf("%s [no tests]\n", relativePackagePath(event.Package))
-	default:
-		fmt.Printf("%s [%d tests%s]\n",
+	case event.Action == ActionSkip && event.PackageEvent():
+		return "EMPTY " + relativePackagePath(event.Package) + "\n", nil
+	case event.Action == ActionPass && event.PackageEvent():
+		return "PASS " + relativePackagePath(event.Package) + "\n", nil
+	case event.Action == ActionFail && event.PackageEvent():
+		return "FAIL " + relativePackagePath(event.Package) + "\n", nil
+	case event.Action == ActionPass:
+		return fmt.Sprintf("--- PASS %s %s %s\n",
 			relativePackagePath(event.Package),
-			pkg.run, // TODO: count can be off because of parallel runs?
-			formatFailedCount(len(pkg.failed), " %d failed"))
+			event.Test,
+			event.ElapsedFormatted(),
+		), nil
+	case event.Action == ActionFail:
+		return fmt.Sprintf("%s--- FAIL %s %s %s\n",
+			exec.Output(event),
+			relativePackagePath(event.Package),
+			event.Test,
+			event.ElapsedFormatted(),
+		), nil
 	}
-	return nil
-}
-
-func formatFailedCount(count int, format string) string {
-	if count == 0 {
-		return ""
-	}
-	return fmt.Sprintf(format, count)
+	return "", nil
 }
 
 func isPackageEndEvent(event TestEvent) bool {
@@ -88,21 +70,18 @@ func isPackageEndEvent(event TestEvent) bool {
 	return strings.HasPrefix(event.Output, "ok ") || strings.HasPrefix(event.Output, "? ")
 }
 
-// TODO: fix newlines
-func testDotsFormat(event TestEvent, exec *Execution) error {
+func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 	pkg := exec.Package(event)
 
 	switch {
 	case event.Action == ActionRun && pkg.run == 1:
-		fmt.Print(relativePackagePath(event.Package) + " ")
+		return "[" + relativePackagePath(event.Package) + "]", nil
 	case event.Action == ActionPass:
-		fmt.Print(".")
+		return ".", nil
 	case event.Action == ActionFail:
-		fmt.Print("x")
-	case isPackageEndEvent(event):
-		fmt.Println()
+		return "x", nil
 	}
-	return nil
+	return "", nil
 }
 
 func PrintExecution(execution *Execution) error {
@@ -113,6 +92,13 @@ func PrintExecution(execution *Execution) error {
 		len(execution.Failed()),
 		execution.Elapsed())
 	return nil
+}
+
+func formatFailedCount(count int, format string) string {
+	if count == 0 {
+		return ""
+	}
+	return fmt.Sprintf(format, count)
 }
 
 // TODO: print failed test summary
@@ -163,31 +149,37 @@ func NewEventHandler(formats []string) HandleEvent {
 func handlersFromFormat(format string) HandleEvent {
 	switch format {
 	case "debug":
-		return debugEvent
+		return debugFormat
 	case "standard":
 		return standardVerboseFormat
 	case "quiet":
 		return standardQuietFormat
-	case "summary":
-		return summaryPackageFormat
 	case "dots":
-		return testDotsFormat
+		return dotsFormat
+	case "condensed":
+		return condensedFormat
 	default:
 		return nil
 	}
 }
 
+// TODO: support multiple handlers without the extra buffer
 func multiHandler(handlers []HandleEvent) HandleEvent {
-	return func(event TestEvent, exec *Execution) error {
+	return func(event TestEvent, exec *Execution) (string, error) {
 		errs := new(bytes.Buffer)
+		out := new(bytes.Buffer)
 		for _, handler := range handlers {
-			if err := handler(event, exec); err != nil {
+			lines, err := handler(event, exec)
+			switch {
+			case err != nil:
 				errs.WriteString(err.Error() + "\n")
+			default:
+				out.WriteString(lines)
 			}
 		}
 		if errs.Len() == 0 {
-			return nil
+			return out.String(), nil
 		}
-		return errors.Errorf("some printers failed: %s", errs)
+		return "", errors.Errorf("some printers failed: %s", errs)
 	}
 }
