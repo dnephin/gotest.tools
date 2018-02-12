@@ -10,6 +10,8 @@ import (
 	"github.com/jonboulle/clockwork"
 )
 
+//go:generate generate.sh
+
 func TestRelativePackagePath(t *testing.T) {
 	relPath := relativePackagePath(
 		"github.com/gotestyourself/gotestyourself/testjson/extra/relpath")
