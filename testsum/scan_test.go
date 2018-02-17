@@ -16,13 +16,7 @@ import (
 
 var cmpSummary = gocmp.Options{
 	gocmp.AllowUnexported(Failure{}),
-	gocmp.FilterPath(fieldpath("Elapsed"), cmpElapsed()),
-}
-
-func fieldpath(spec string) func(gocmp.Path) bool {
-	return func(path gocmp.Path) bool {
-		return path.String() == spec
-	}
+	gocmp.FilterPath(opt.PathString("Elapsed"), cmpElapsed()),
 }
 
 func cmpElapsed() gocmp.Option {
