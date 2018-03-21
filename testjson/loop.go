@@ -55,6 +55,7 @@ func (e TestEvent) ElapsedFormatted() string {
 type Package struct {
 	run    int
 	failed []TestEvent
+	//skipped []TestEvent
 	//passed []time.Duration
 	output map[string]*bytes.Buffer
 }
@@ -69,6 +70,7 @@ func newPackage() *Package {
 type Execution struct {
 	started  time.Time
 	packages map[string]*Package
+	errors   []string
 }
 
 // TODO: detect skipped tests
@@ -137,6 +139,15 @@ func (e *Execution) Total() int {
 	return total
 }
 
+func (e *Execution) addError(err string) {
+	// TODO: may need locking, or use a channel
+	e.errors = append(e.errors, err)
+}
+
+func (e *Execution) Errors() []string {
+	return e.errors
+}
+
 func NewExecution() *Execution {
 	return &Execution{
 		started:  time.Now(),
@@ -146,9 +157,18 @@ func NewExecution() *Execution {
 
 type HandleEvent func(event TestEvent, output *Execution) (string, error)
 
-func ScanTestOutput(in io.Reader, out io.Writer, handler HandleEvent) (*Execution, error) {
+type ScanConfig struct {
+	Stdout  io.Reader
+	Stderr  io.Reader
+	Out     io.Writer
+	Err     io.Writer
+	Handler HandleEvent
+}
+
+func ScanTestOutput(config ScanConfig) (*Execution, error) {
 	execution := NewExecution()
-	scanner := bufio.NewScanner(in)
+	waitOnStderr := readStderr(config.Stderr, config.Err, execution)
+	scanner := bufio.NewScanner(config.Stdout)
 
 	for scanner.Scan() {
 		raw := scanner.Bytes()
@@ -157,13 +177,31 @@ func ScanTestOutput(in io.Reader, out io.Writer, handler HandleEvent) (*Executio
 			return nil, errors.Wrapf(err, "failed to parse test output: %s", string(raw))
 		}
 		execution.add(event)
-		line, err := handler(event, execution)
+		line, err := config.Handler(event, execution)
 		if err != nil {
 			return nil, err
 		}
-		out.Write([]byte(line))
+		config.Out.Write([]byte(line))
+	}
+
+	if err := <-waitOnStderr; err != nil {
+		// TODO: log failure
 	}
 	return execution, errors.Wrap(scanner.Err(), "failed to scan test output")
+}
+
+func readStderr(in io.Reader, out io.Writer, exec *Execution) chan error {
+	wait := make(chan error)
+	go func() {
+		scanner := bufio.NewScanner(in)
+		for scanner.Scan() {
+			exec.addError(scanner.Text())
+			out.Write(scanner.Bytes())
+		}
+		wait <- scanner.Err()
+		close(wait)
+	}()
+	return wait
 }
 
 func parseEvent(raw []byte) (TestEvent, error) {

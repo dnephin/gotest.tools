@@ -92,9 +92,11 @@ func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 // TODO: show skipped
 func PrintExecution(out io.Writer, execution *Execution) error {
 	failed := execution.Failed()
-	fmt.Fprintf(out, "\nDONE %d tests%s in %s\n",
+	errors := execution.Errors()
+	fmt.Fprintf(out, "\nDONE %d tests%s%s in %s\n",
 		execution.Total(),
-		formatFailedCount(len(failed), " with %d failure(s)"),
+		formatTestCount(len(failed), "failure"),
+		formatTestCount(len(errors), "error"),
 		formatDuration(execution.Elapsed()))
 
 	// TODO: include package name in failure summary
@@ -104,11 +106,15 @@ func PrintExecution(out io.Writer, execution *Execution) error {
 	return nil
 }
 
-func formatFailedCount(count int, format string) string {
-	if count == 0 {
+func formatTestCount(count int, category string) string {
+	switch count {
+	case 0:
 		return ""
+	case 1:
+	default:
+		category += "s"
 	}
-	return fmt.Sprintf(format, count)
+	return fmt.Sprintf(", %d %s", count, category)
 }
 
 func formatDuration(d time.Duration) string {

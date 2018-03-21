@@ -2,6 +2,7 @@ package testjson
 
 import (
 	"bytes"
+	"os"
 	"testing"
 	"time"
 
@@ -30,7 +31,13 @@ func TestCondensedFormat(t *testing.T) {
 	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
 	goTestOutput := golden.Get(t, "go-test-json-output")
 	out := new(bytes.Buffer)
-	_, err := ScanTestOutput(bytes.NewReader(goTestOutput), out, condensedFormat)
+	_, err := ScanTestOutput(ScanConfig{
+		Stdout:  bytes.NewReader(goTestOutput),
+		Stderr:  bytes.NewReader([]byte{}),
+		Out:     out,
+		Err:     os.Stderr,
+		Handler: condensedFormat,
+	})
 	assert.NilError(t, err)
 
 	golden.Assert(t, out.String(), "condensed-format")
@@ -46,7 +53,13 @@ func TestDotsFormat(t *testing.T) {
 	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
 	goTestOutput := golden.Get(t, "go-test-json-output")
 	out := new(bytes.Buffer)
-	_, err := ScanTestOutput(bytes.NewReader(goTestOutput), out, dotsFormat)
+	_, err := ScanTestOutput(ScanConfig{
+		Stdout:  bytes.NewReader(goTestOutput),
+		Stderr:  bytes.NewReader([]byte{}),
+		Out:     out,
+		Err:     os.Stderr,
+		Handler: dotsFormat,
+	})
 	assert.NilError(t, err)
 
 	golden.Assert(t, out.String(), "dots-format")
@@ -119,13 +132,16 @@ func TestPrintExecutionWithFailures(t *testing.T) {
 				},
 			},
 		},
+		errors: []string{
+			"pkg/file.go:99:12: missing ',' before newline",
+		},
 	}
 	fake.Advance(34123111 * time.Microsecond)
 	err := PrintExecution(out, exec)
 	assert.NilError(t, err)
 
 	expected := `
-DONE 13 tests with 3 failure(s) in 34.123s
+DONE 13 tests, 3 failures, 1 error in 34.123s
 === RUN   TestFileDo
     do_test.go:33 assertion failed
 --- FAIL: TestFailDo (1.41s)

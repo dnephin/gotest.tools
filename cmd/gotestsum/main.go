@@ -73,7 +73,13 @@ func run(opts *options) error {
 
 	out := os.Stdout
 	handler := testjson.NewEventHandler(opts.format)
-	exec, err := testjson.ScanTestOutput(goTestProc.stdout, out, handler)
+	exec, err := testjson.ScanTestOutput(testjson.ScanConfig{
+		Stdout:  goTestProc.stdout,
+		Stderr:  goTestProc.stderr,
+		Handler: handler,
+		Out:     out,
+		Err:     os.Stderr,
+	})
 	if err != nil {
 		return err
 	}
@@ -106,6 +112,7 @@ func hasJsonArg(args []string) bool {
 type proc struct {
 	cmd    *exec.Cmd
 	stdout io.Reader
+	stderr io.Reader
 	cancel func()
 }
 
@@ -118,11 +125,12 @@ func startGoTest(ctx context.Context, args []string, debug bool) (proc, error) {
 	if debug {
 		log.Printf("%s", p.cmd.Args)
 	}
-	// TODO: must capture stderr to detect failure to build a package
-	// TODO: how to link stderr to a test?
-	p.cmd.Stderr = os.Stderr
 	var err error
 	p.stdout, err = p.cmd.StdoutPipe()
+	if err != nil {
+		return p, err
+	}
+	p.stderr, err = p.cmd.StderrPipe()
 	if err != nil {
 		return p, err
 	}
