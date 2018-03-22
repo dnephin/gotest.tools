@@ -100,7 +100,7 @@ func (e *Execution) add(event TestEvent) {
 	}
 }
 
-func testDuration(event TestEvent) time.Duration {
+func elapsedDuration(event TestEvent) time.Duration {
 	return time.Duration(event.Elapsed*1000) * time.Millisecond
 }
 
@@ -196,7 +196,7 @@ func readStderr(in io.Reader, out io.Writer, exec *Execution) chan error {
 		scanner := bufio.NewScanner(in)
 		for scanner.Scan() {
 			exec.addError(scanner.Text())
-			out.Write(scanner.Bytes())
+			out.Write(append(scanner.Bytes(), '\n'))
 		}
 		wait <- scanner.Err()
 		close(wait)

@@ -48,14 +48,14 @@ Flags:
 		flags.PrintDefaults()
 	}
 	flags.BoolVar(&opts.debug, "debug", false, "enabled debug")
-	flags.StringSliceVar(&opts.format, "format", nil,
+	flags.StringVar(&opts.format, "format", "short",
 		"print format of test input")
 	return flags, opts
 }
 
 type options struct {
 	args   []string
-	format []string
+	format string
 	debug  bool
 }
 
@@ -73,6 +73,9 @@ func run(opts *options) error {
 
 	out := os.Stdout
 	handler := testjson.NewEventHandler(opts.format)
+	if handler == nil {
+		return errors.Errorf("unknown format %s", opts.format)
+	}
 	exec, err := testjson.ScanTestOutput(testjson.ScanConfig{
 		Stdout:  goTestProc.stdout,
 		Stderr:  goTestProc.stderr,

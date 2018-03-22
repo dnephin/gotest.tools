@@ -36,7 +36,7 @@ func TestCondensedFormat(t *testing.T) {
 		Stderr:  bytes.NewReader([]byte{}),
 		Out:     out,
 		Err:     os.Stderr,
-		Handler: condensedFormat,
+		Handler: shortVerboseFormat,
 	})
 	assert.NilError(t, err)
 
