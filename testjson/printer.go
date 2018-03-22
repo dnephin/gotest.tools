@@ -53,7 +53,7 @@ func shortVerboseFormat(event TestEvent, exec *Execution) (string, error) {
 		), nil
 	case event.Action == ActionFail:
 		return fmt.Sprintf("%s--- FAIL %s %s %s\n",
-			exec.Output(event),
+			strings.Join(exec.Output(event), ""),
 			relativePackagePath(event.Package),
 			event.Test,
 			event.ElapsedFormatted(),
@@ -121,12 +121,22 @@ func PrintExecution(out io.Writer, execution *Execution) error {
 		execution.Total(),
 		formatTestCount(len(failed), "failure"),
 		formatTestCount(len(errors), "error"),
-		formatDurationAsSeconds(execution.Elapsed()))
+		formatDurationAsSeconds(execution.Elapsed(), 3))
 
-	// TODO: include package name in failure summary
-	for _, failure := range failed {
-		fmt.Fprintf(out, execution.Output(failure))
+	if len(failed) > 0 {
+		fmt.Fprintln(out, "\n=== Failures")
 	}
+	for _, failure := range failed {
+		writeFailureSummary(out, failure, execution.Output(failure))
+	}
+
+	if len(errors) > 0 {
+		fmt.Fprintln(out, "\n=== Errors")
+	}
+	for _, err := range errors {
+		fmt.Fprintln(out, err)
+	}
+
 	return nil
 }
 
@@ -141,12 +151,25 @@ func formatTestCount(count int, category string) string {
 	return fmt.Sprintf(", %d %s", count, category)
 }
 
-func formatDurationAsSeconds(d time.Duration) string {
-	return fmt.Sprintf("%.3fs", float64(d.Nanoseconds()/1000000)/1000)
+func formatDurationAsSeconds(d time.Duration, precision int) string {
+	return fmt.Sprintf("%.[2]*[1]fs", float64(d.Nanoseconds()/1000000)/1000, precision)
 }
 
-// TODO: print failed test summary
-// TODO: test data with: failed, skipped, empty package, parallel, subtests
+func writeFailureSummary(out io.Writer, event TestEvent, failure []string) {
+	fmt.Fprintf(out, "=== FAIL: %s %s %s\n",
+		relativePackagePath(event.Package), event.Test, event.ElapsedFormatted())
+	for _, line := range failure[1:] {
+		if isFailLine(line) {
+			continue
+		}
+		fmt.Fprint(out, line)
+	}
+	fmt.Fprintln(out)
+}
+
+func isFailLine(line string) bool {
+	return strings.HasPrefix(line, "--- FAIL: Test")
+}
 
 func relativePackagePath(pkgpath string) string {
 	if pkgpath == pkgPathPrefix {

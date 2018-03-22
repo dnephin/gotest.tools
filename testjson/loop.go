@@ -2,10 +2,10 @@ package testjson
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 	"time"
 
@@ -49,21 +49,22 @@ func (e TestEvent) PackageEvent() bool {
 
 // ElapsedFormatted returns Elapsed formatted in the go test format, ex (0.00s).
 func (e TestEvent) ElapsedFormatted() string {
-	return fmt.Sprintf("(%.2f)", e.Elapsed)
+	return fmt.Sprintf("(%.2fs)", e.Elapsed)
 }
 
 // Package is the set of TestEvents for a single go package
 type Package struct {
-	run    int
+	run int
+	// TODO: only store test name, and elapsed for failed
 	failed []TestEvent
 	//skipped []TestEvent
 	//passed []time.Duration
-	output map[string]*bytes.Buffer
+	output map[string][]string
 }
 
 func newPackage() *Package {
 	return &Package{
-		output: make(map[string]*bytes.Buffer),
+		output: make(map[string][]string),
 	}
 }
 
@@ -93,11 +94,8 @@ func (e *Execution) add(event TestEvent) {
 	case ActionFail:
 		pkg.failed = append(pkg.failed, event)
 	case ActionOutput, ActionBench:
-		if pkg.output[event.Test] == nil {
-			pkg.output[event.Test] = new(bytes.Buffer)
-		}
 		// TODO: limit size of buffered test output
-		pkg.output[event.Test].WriteString(event.Output)
+		pkg.output[event.Test] = append(pkg.output[event.Test], event.Output)
 	}
 }
 
@@ -106,12 +104,8 @@ func elapsedDuration(event TestEvent) time.Duration {
 }
 
 // Output returns the full test output for a test.
-func (e *Execution) Output(event TestEvent) string {
-	output := e.packages[event.Package].output[event.Test]
-	if output == nil {
-		return ""
-	}
-	return output.String()
+func (e *Execution) Output(event TestEvent) []string {
+	return e.packages[event.Package].output[event.Test]
 }
 
 func (e *Execution) Package(event TestEvent) *Package {
@@ -124,12 +118,22 @@ func (e *Execution) Elapsed() time.Duration {
 	return clock.Now().Sub(e.started)
 }
 
+// TODO: return test name and package name
 func (e *Execution) Failed() []TestEvent {
-	failed := []TestEvent{}
-	for _, pkg := range e.packages {
-		failed = append(failed, pkg.failed...)
+	var failed []TestEvent
+	for _, pkg := range sortedKeys(e.packages) {
+		failed = append(failed, e.packages[pkg].failed...)
 	}
 	return failed
+}
+
+func sortedKeys(pkgs map[string]*Package) []string {
+	var keys []string
+	for key := range pkgs {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func (e *Execution) Total() int {
