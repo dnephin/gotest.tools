@@ -3,11 +3,9 @@ package testjson
 import (
 	"fmt"
 	"go/build"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 func debugFormat(event TestEvent, _ *Execution) (string, error) {
@@ -112,98 +110,6 @@ func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 	return "", nil
 }
 
-func PrintExecution(out io.Writer, execution *Execution) error {
-	errors := execution.Errors()
-	fmt.Fprintf(out, "\nDONE %d tests%s%s%s in %s\n",
-		execution.Total(),
-		formatTestCount(len(execution.Skipped()), "skipped", ""),
-		formatTestCount(len(execution.Failed()), "failure", "s"),
-		formatTestCount(len(errors), "error", "s"),
-		formatDurationAsSeconds(execution.Elapsed(), 3))
-
-	writeTestCaseSummary(out, execution, formatSkipped)
-	writeTestCaseSummary(out, execution, formatFailures)
-
-	if len(errors) > 0 {
-		fmt.Fprintln(out, "\n=== Errors")
-	}
-	for _, err := range errors {
-		fmt.Fprintln(out, err)
-	}
-
-	return nil
-}
-
-func formatTestCount(count int, category string, pluralize string) string {
-	switch count {
-	case 0:
-		return ""
-	case 1:
-	default:
-		category += pluralize
-	}
-	return fmt.Sprintf(", %d %s", count, category)
-}
-
-func formatDurationAsSeconds(d time.Duration, precision int) string {
-	return fmt.Sprintf("%.[2]*[1]fs", float64(d.Nanoseconds()/1000000)/1000, precision)
-}
-
-func writeTestCaseSummary(out io.Writer, execution *Execution, conf testCaseFormatConfig) {
-	testCases := conf.getter(execution)
-	if len(testCases) == 0 {
-		return
-	}
-	fmt.Fprintln(out, "\n"+conf.header)
-	for _, tc := range testCases {
-		fmt.Fprintf(out, "%s %s %s (%s)\n",
-			conf.prefix,
-			relativePackagePath(tc.Package),
-			tc.Test,
-			formatDurationAsSeconds(tc.Elapsed, 2))
-		for _, line := range execution.Output(tc.Package, tc.Test) {
-			if isRunLine(line) || conf.filter(line) {
-				continue
-			}
-			fmt.Fprint(out, line)
-		}
-		fmt.Fprintln(out)
-	}
-}
-
-type testCaseFormatConfig struct {
-	header string
-	prefix string
-	filter func(string) bool
-	getter func(*Execution) []testCase
-}
-
-var formatFailures = testCaseFormatConfig{
-	header: "=== Failures",
-	prefix: "=== FAIL:",
-	filter: func(line string) bool {
-		return strings.HasPrefix(line, "--- FAIL: Test")
-	},
-	getter: func(execution *Execution) []testCase {
-		return execution.Failed()
-	},
-}
-
-var formatSkipped = testCaseFormatConfig{
-	header: "=== Skipped",
-	prefix: "=== SKIP:",
-	filter: func(line string) bool {
-		return strings.HasPrefix(line, "--- SKIP: Test")
-	},
-	getter: func(execution *Execution) []testCase {
-		return execution.Skipped()
-	},
-}
-
-func isRunLine(line string) bool {
-	return strings.HasPrefix(line, "=== RUN   Test")
-}
-
 func relativePackagePath(pkgpath string) string {
 	if pkgpath == pkgPathPrefix {
 		return "."
@@ -226,6 +132,7 @@ func getPkgPathPrefix() string {
 
 var pkgPathPrefix = getPkgPathPrefix()
 
+// NewEventHandler returns a handler for printing events.
 func NewEventHandler(format string) HandleEvent {
 	switch format {
 	case "debug":

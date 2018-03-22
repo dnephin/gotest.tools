@@ -2,4 +2,4 @@
 
 package broken
 
-var missingImport = somepackage.Foo()
+var missingImport = somepackage.Foo() // nolint

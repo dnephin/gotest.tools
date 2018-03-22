@@ -55,13 +55,14 @@ func (e TestEvent) ElapsedFormatted() string {
 // Package is the set of TestEvents for a single go package
 type Package struct {
 	run     int
-	failed  []testCase
-	skipped []testCase
+	failed  []TestCase
+	skipped []TestCase
 	//passed []time.Duration
 	output map[string][]string
 }
 
-type testCase struct {
+// TestCase stores the name and elapsed time for a test case.
+type TestCase struct {
 	Package string
 	Test    string
 	Elapsed time.Duration
@@ -90,17 +91,17 @@ func (e *Execution) add(event TestEvent) {
 
 	switch event.Action {
 	case ActionRun:
-		pkg.run += 1
+		pkg.run++
 	case ActionPass:
 		//pkg.passed = append(pkg.passed, testDuration(event))
 	case ActionFail:
-		pkg.failed = append(pkg.failed, testCase{
+		pkg.failed = append(pkg.failed, TestCase{
 			Package: event.Package,
 			Test:    event.Test,
 			Elapsed: elapsedDuration(event),
 		})
 	case ActionSkip:
-		pkg.skipped = append(pkg.skipped, testCase{
+		pkg.skipped = append(pkg.skipped, TestCase{
 			Package: event.Package,
 			Test:    event.Test,
 			Elapsed: elapsedDuration(event),
@@ -121,18 +122,21 @@ func (e *Execution) Output(pkg, test string) []string {
 	return e.packages[pkg].output[test]
 }
 
+// Package returns the Package for a TestEvent.
 func (e *Execution) Package(event TestEvent) *Package {
 	return e.packages[event.Package]
 }
 
 var clock = clockwork.NewRealClock()
 
+// Elapsed returns the time elapsed since the execution started.
 func (e *Execution) Elapsed() time.Duration {
 	return clock.Now().Sub(e.started)
 }
 
-func (e *Execution) Failed() []testCase {
-	var failed []testCase
+// Failed returns a list of all the failed test cases.
+func (e *Execution) Failed() []TestCase {
+	var failed []TestCase
 	for _, pkg := range sortedKeys(e.packages) {
 		failed = append(failed, e.packages[pkg].failed...)
 	}
@@ -148,14 +152,16 @@ func sortedKeys(pkgs map[string]*Package) []string {
 	return keys
 }
 
-func (e *Execution) Skipped() []testCase {
-	var skipped []testCase
+// Skipped returns a list of all the skipped test cases.
+func (e *Execution) Skipped() []TestCase {
+	var skipped []TestCase
 	for _, pkg := range sortedKeys(e.packages) {
 		skipped = append(skipped, e.packages[pkg].skipped...)
 	}
 	return skipped
 }
 
+// Total returns a count of all test cases.
 func (e *Execution) Total() int {
 	total := 0
 	for _, pkg := range e.packages {
@@ -173,10 +179,13 @@ func (e *Execution) addError(err string) {
 	e.errors = append(e.errors, err)
 }
 
+// Errors returns a list of all the errors.
 func (e *Execution) Errors() []string {
 	return e.errors
 }
 
+// NewExecution returns a new Execution and records the current time as the
+// time the test execution started.
 func NewExecution() *Execution {
 	return &Execution{
 		started:  time.Now(),
@@ -184,8 +193,11 @@ func NewExecution() *Execution {
 	}
 }
 
+// HandleEvent is a function which handles an event and returns a string to
+// output for the event.
 type HandleEvent func(event TestEvent, output *Execution) (string, error)
 
+// ScanConfig used by ScanTestOutput
 type ScanConfig struct {
 	Stdout  io.Reader
 	Stderr  io.Reader
@@ -194,6 +206,8 @@ type ScanConfig struct {
 	Handler HandleEvent
 }
 
+// ScanTestOutput reads lines from stdout and stderr, creates an Execution,
+// calls the Handler for each event, and returns the Execution.
 func ScanTestOutput(config ScanConfig) (*Execution, error) {
 	execution := NewExecution()
 	waitOnStderr := readStderr(config.Stderr, config.Err, execution)

@@ -41,29 +41,40 @@ func setupFlags(name string) (*pflag.FlagSet, *options) {
 	flags.SetInterspersed(false)
 	flags.Usage = func() {
 		fmt.Fprintf(os.Stderr, `Usage:
-    %s [flags] [--] [go test flags] 
+    %s [flags] [--] [go test flags]
 
 Flags:
 `, name)
 		flags.PrintDefaults()
+		fmt.Fprint(os.Stderr, `
+Formats:
+    dots              print a character for each test
+    short             print a line for each package
+    short-verbose     print a line for each test and package
+    standard-quiet    default go test format
+    standard-verbose  default go test -v format
+`)
 	}
 	flags.BoolVar(&opts.debug, "debug", false, "enabled debug")
 	flags.StringVar(&opts.format, "format", "short",
 		"print format of test input")
+	flags.BoolVar(&opts.rawCommand, "raw-command", false,
+		"don't prepend 'go test -json' to the 'go test' command")
 	return flags, opts
 }
 
 type options struct {
-	args   []string
-	format string
-	debug  bool
+	args       []string
+	format     string
+	debug      bool
+	rawCommand bool
 }
 
 // TODO: add flag --max-failures
 // TODO: use logrus
 func run(opts *options) error {
 	ctx := context.Background()
-	goTestProc, err := startGoTest(ctx, goTestCmdArgs(opts.args), opts.debug)
+	goTestProc, err := startGoTest(ctx, goTestCmdArgs(opts), opts.debug)
 	if err != nil {
 		return errors.Wrapf(err, "failed to run %s %s",
 			goTestProc.cmd.Path,
@@ -87,25 +98,29 @@ func run(opts *options) error {
 		return err
 	}
 	// TODO: make an interface based on a --summary flag
-	if err := testjson.PrintExecution(out, exec); err != nil {
+	if err := testjson.PrintSummary(out, exec); err != nil {
 		return err
 	}
 	return goTestProc.cmd.Wait()
 }
 
-func goTestCmdArgs(args []string) []string {
-	if len(args) == 0 {
-		return []string{"-json", "./..."}
+func goTestCmdArgs(opts *options) []string {
+	args := opts.args
+	defaultArgs := []string{"go", "test"}
+	switch {
+	case opts.rawCommand:
+		return args
+	case len(args) == 0:
+		return append(defaultArgs, "-json", "./...")
+	case !hasJSONArg(args):
+		defaultArgs = append(defaultArgs, "-json")
 	}
-	if !hasJsonArg(args) {
-		args = prepend("-json", args...)
-	}
-	return args
+	return append(defaultArgs, args...)
 }
 
-func hasJsonArg(args []string) bool {
+func hasJSONArg(args []string) bool {
 	for _, arg := range args {
-		if arg == "-json" {
+		if arg == "-json" || arg == "--json" {
 			return true
 		}
 	}
@@ -122,11 +137,11 @@ type proc struct {
 func startGoTest(ctx context.Context, args []string, debug bool) (proc, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	p := proc{
-		cmd:    exec.CommandContext(ctx, "go", prepend("test", args...)...),
+		cmd:    exec.CommandContext(ctx, args[0], args[1:]...),
 		cancel: cancel,
 	}
 	if debug {
-		log.Printf("%s", p.cmd.Args)
+		log.Printf("exec: %s", p.cmd.Args)
 	}
 	var err error
 	p.stdout, err = p.cmd.StdoutPipe()
@@ -138,8 +153,4 @@ func startGoTest(ctx context.Context, args []string, debug bool) (proc, error) {
 		return p, err
 	}
 	return p, p.cmd.Start()
-}
-
-func prepend(first string, rest ...string) []string {
-	return append([]string{first}, rest...)
 }
