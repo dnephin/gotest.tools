@@ -1,9 +1,28 @@
-#!/usr/bin/env sh
-set -eu -o pipfail
+#!/usr/bin/env bash
+set -eu
 
-go test --tags stubpkg ./internal/... > testdata/standard-quiet-format
-go test -v --tags stubpkg ./internal/... > testdata/standard-verbose-format
-go test --json --tags stubpkg ./internal/... > testdata/go-test-json-output
-go test --json --tags 'stubpkg timeoutstub' ./internal/... > testdata/go-test-json-output-timeout
+go test -p 1 -tags stubpkg ./internal/... \
+    > testdata/go-test-quiet.out \
+    2> testdata/go-test-quiet.err \
+    | true
 
 
+go test -p 1 -v -tags stubpkg ./internal/... \
+    > testdata/go-test-verbose.out \
+    2> testdata/go-test-verbose.err \
+    | true
+
+go test -p 1 -json -tags stubpkg ./internal/... \
+    > testdata/go-test-json.out \
+    2> testdata/go-test-json.err \
+    | true
+
+go test -p 1 -json -timeout 10ms -tags 'stubpkg timeoutstub' ./internal/... \
+    > testdata/go-test-json-with-timeout.out \
+    2> testdata/go-test-json-with-timeout.err \
+    | true
+
+go test -p 1 -json -tags 'stubpkg panicstub' ./internal/... \
+    > testdata/go-test-json-with-panic.out \
+    2> testdata/go-test-json-with-panic.err \
+    | true

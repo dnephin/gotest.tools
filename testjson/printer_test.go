@@ -2,16 +2,49 @@ package testjson
 
 import (
 	"bytes"
-	"os"
 	"testing"
 	"time"
 
+	gocmp "github.com/google/go-cmp/cmp"
 	"github.com/gotestyourself/gotestyourself/assert"
+	"github.com/gotestyourself/gotestyourself/assert/opt"
 	"github.com/gotestyourself/gotestyourself/golden"
 	"github.com/jonboulle/clockwork"
 )
 
-//go:generate generate.sh
+//go:generate ./generate.sh
+
+type scanConfigShim struct {
+	inputName string
+	handler   HandleEvent
+	Out       *bytes.Buffer
+	Err       *bytes.Buffer
+}
+
+func (s *scanConfigShim) Config(t *testing.T) ScanConfig {
+	return ScanConfig{
+		Stdout:  bytes.NewReader(golden.Get(t, s.inputName+".out")),
+		Stderr:  bytes.NewReader(golden.Get(t, s.inputName+".err")),
+		Out:     s.Out,
+		Err:     s.Err,
+		Handler: s.handler,
+	}
+}
+
+func newConfigShim(handler HandleEvent, inputName string) *scanConfigShim {
+	return &scanConfigShim{
+		inputName: inputName,
+		handler:   handler,
+		Out:       new(bytes.Buffer),
+		Err:       new(bytes.Buffer),
+	}
+}
+
+func patchPkgPathPrefix(val string) func() {
+	var oldVal string
+	oldVal, pkgPathPrefix = pkgPathPrefix, val
+	return func() { pkgPathPrefix = oldVal }
+}
 
 func TestRelativePackagePath(t *testing.T) {
 	relPath := relativePackagePath(
@@ -27,42 +60,47 @@ func TestGetPkgPathPrefix(t *testing.T) {
 	assert.Equal(t, pkgPathPrefix, "github.com/gotestyourself/gotestyourself/testjson")
 }
 
-func TestCondensedFormat(t *testing.T) {
+func TestScanTestOutputWithShortVerboseFormat(t *testing.T) {
 	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
-	goTestOutput := golden.Get(t, "go-test-json-output")
-	out := new(bytes.Buffer)
-	_, err := ScanTestOutput(ScanConfig{
-		Stdout:  bytes.NewReader(goTestOutput),
-		Stderr:  bytes.NewReader([]byte{}),
-		Out:     out,
-		Err:     os.Stderr,
-		Handler: shortVerboseFormat,
-	})
-	assert.NilError(t, err)
 
-	golden.Assert(t, out.String(), "condensed-format")
+	shim := newConfigShim(shortVerboseFormat, "go-test-json")
+	exec, err := ScanTestOutput(shim.Config(t))
+
+	assert.NilError(t, err)
+	golden.Assert(t, shim.Out.String(), "short-verbose-format.out")
+	golden.Assert(t, shim.Err.String(), "short-verbose-format.err")
+	expected := &Execution{
+		started: time.Now(),
+		errors:  []string{"internal/broken/broken.go:5:21: undefined: somepackage"},
+	}
+	assert.DeepEqual(t, exec, expected, cmpExecutionShalow)
 }
 
-func patchPkgPathPrefix(val string) func() {
-	var oldVal string
-	oldVal, pkgPathPrefix = pkgPathPrefix, val
-	return func() { pkgPathPrefix = oldVal }
+var cmpExecutionShalow = gocmp.Options{
+	gocmp.AllowUnexported(Execution{}, Package{}),
+	gocmp.FilterPath(stringPath("started"), opt.TimeWithThreshold(10*time.Second)),
+	// TODO: remove ignore
+	gocmp.FilterPath(stringPath("packages"), gocmp.Ignore()),
 }
 
-func TestDotsFormat(t *testing.T) {
-	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
-	goTestOutput := golden.Get(t, "go-test-json-output")
-	out := new(bytes.Buffer)
-	_, err := ScanTestOutput(ScanConfig{
-		Stdout:  bytes.NewReader(goTestOutput),
-		Stderr:  bytes.NewReader([]byte{}),
-		Out:     out,
-		Err:     os.Stderr,
-		Handler: dotsFormat,
-	})
-	assert.NilError(t, err)
+//var cmpPackage = cmpopts.IgnoreFields(Package{}, "output")
 
-	golden.Assert(t, out.String(), "dots-format")
+func stringPath(spec string) func(gocmp.Path) bool {
+	return func(path gocmp.Path) bool {
+		return path.String() == spec
+	}
+}
+
+func TestScanTestOutputWithDotsFormat(t *testing.T) {
+	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
+
+	shim := newConfigShim(dotsFormat, "go-test-json")
+	_, err := ScanTestOutput(shim.Config(t))
+
+	assert.NilError(t, err)
+	golden.Assert(t, shim.Out.String(), "dots-format.out")
+	golden.Assert(t, shim.Err.String(), "dots-format.err")
+	// TODO: compare Execution
 }
 
 func TestPrintExecutionNoFailures(t *testing.T) {

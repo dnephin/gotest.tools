@@ -174,9 +174,9 @@ func NewEventHandler(format string) HandleEvent {
 	switch format {
 	case "debug":
 		return debugFormat
-	case "standard":
+	case "standard-verbose":
 		return standardVerboseFormat
-	case "quiet":
+	case "standard-quiet":
 		return standardQuietFormat
 	case "dots":
 		return dotsFormat

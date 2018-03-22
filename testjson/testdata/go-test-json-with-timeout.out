@@ -1,0 +1,278 @@
+{"Time":"2018-03-22T17:17:12.237912936Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassed"}
+{"Time":"2018-03-22T17:17:12.23800492Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassed","Output":"=== RUN   TestPassed\n"}
+{"Time":"2018-03-22T17:17:12.238016312Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassed","Output":"--- PASS: TestPassed (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238021375Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassed","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238027323Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithLog"}
+{"Time":"2018-03-22T17:17:12.238030976Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithLog","Output":"=== RUN   TestPassedWithLog\n"}
+{"Time":"2018-03-22T17:17:12.238035369Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithLog","Output":"--- PASS: TestPassedWithLog (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238039166Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithLog","Output":"\tgood_test.go:15: this is a log\n"}
+{"Time":"2018-03-22T17:17:12.238043038Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithLog","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238046378Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithStdout"}
+{"Time":"2018-03-22T17:17:12.238049624Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithStdout","Output":"=== RUN   TestPassedWithStdout\n"}
+{"Time":"2018-03-22T17:17:12.238053287Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithStdout","Output":"this is a Print\n"}
+{"Time":"2018-03-22T17:17:12.238057357Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithStdout","Output":"--- PASS: TestPassedWithStdout (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238061287Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestPassedWithStdout","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.23806489Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkipped"}
+{"Time":"2018-03-22T17:17:12.238068306Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkipped","Output":"=== RUN   TestSkipped\n"}
+{"Time":"2018-03-22T17:17:12.238072418Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkipped","Output":"--- SKIP: TestSkipped (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238076455Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkipped","Output":"\tgood_test.go:23: \n"}
+{"Time":"2018-03-22T17:17:12.238080316Z","Action":"skip","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkipped","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238083701Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkippedWitLog"}
+{"Time":"2018-03-22T17:17:12.238086988Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkippedWitLog","Output":"=== RUN   TestSkippedWitLog\n"}
+{"Time":"2018-03-22T17:17:12.238091843Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkippedWitLog","Output":"--- SKIP: TestSkippedWitLog (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238099404Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkippedWitLog","Output":"\tgood_test.go:27: the skip message\n"}
+{"Time":"2018-03-22T17:17:12.238104044Z","Action":"skip","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestSkippedWitLog","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238107488Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestWithStderr"}
+{"Time":"2018-03-22T17:17:12.238110746Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestWithStderr","Output":"=== RUN   TestWithStderr\n"}
+{"Time":"2018-03-22T17:17:12.238114401Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestWithStderr","Output":"this is stderr\n"}
+{"Time":"2018-03-22T17:17:12.238118348Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestWithStderr","Output":"--- PASS: TestWithStderr (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238122231Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestWithStderr","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238125654Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst"}
+{"Time":"2018-03-22T17:17:12.238129487Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst","Output":"=== RUN   TestParallelTheFirst\n"}
+{"Time":"2018-03-22T17:17:12.238133484Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst","Output":"=== PAUSE TestParallelTheFirst\n"}
+{"Time":"2018-03-22T17:17:12.238137072Z","Action":"pause","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst"}
+{"Time":"2018-03-22T17:17:12.238143009Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond"}
+{"Time":"2018-03-22T17:17:12.238149147Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond","Output":"=== RUN   TestParallelTheSecond\n"}
+{"Time":"2018-03-22T17:17:12.238154728Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond","Output":"=== PAUSE TestParallelTheSecond\n"}
+{"Time":"2018-03-22T17:17:12.238160633Z","Action":"pause","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond"}
+{"Time":"2018-03-22T17:17:12.238165991Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird"}
+{"Time":"2018-03-22T17:17:12.238174226Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird","Output":"=== RUN   TestParallelTheThird\n"}
+{"Time":"2018-03-22T17:17:12.238180751Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird","Output":"=== PAUSE TestParallelTheThird\n"}
+{"Time":"2018-03-22T17:17:12.238186311Z","Action":"pause","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird"}
+{"Time":"2018-03-22T17:17:12.238192028Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess"}
+{"Time":"2018-03-22T17:17:12.238197103Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess","Output":"=== RUN   TestNestedSuccess\n"}
+{"Time":"2018-03-22T17:17:12.238202941Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a"}
+{"Time":"2018-03-22T17:17:12.23820795Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a","Output":"=== RUN   TestNestedSuccess/a\n"}
+{"Time":"2018-03-22T17:17:12.238217584Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a/sub"}
+{"Time":"2018-03-22T17:17:12.238225989Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a/sub","Output":"=== RUN   TestNestedSuccess/a/sub\n"}
+{"Time":"2018-03-22T17:17:12.238235767Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b"}
+{"Time":"2018-03-22T17:17:12.238239773Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b","Output":"=== RUN   TestNestedSuccess/b\n"}
+{"Time":"2018-03-22T17:17:12.23824348Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b/sub"}
+{"Time":"2018-03-22T17:17:12.238247039Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b/sub","Output":"=== RUN   TestNestedSuccess/b/sub\n"}
+{"Time":"2018-03-22T17:17:12.238252155Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c"}
+{"Time":"2018-03-22T17:17:12.238258135Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c","Output":"=== RUN   TestNestedSuccess/c\n"}
+{"Time":"2018-03-22T17:17:12.238262097Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c/sub"}
+{"Time":"2018-03-22T17:17:12.238265462Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c/sub","Output":"=== RUN   TestNestedSuccess/c/sub\n"}
+{"Time":"2018-03-22T17:17:12.238269402Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d"}
+{"Time":"2018-03-22T17:17:12.238272768Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d","Output":"=== RUN   TestNestedSuccess/d\n"}
+{"Time":"2018-03-22T17:17:12.238277781Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d/sub"}
+{"Time":"2018-03-22T17:17:12.238281166Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d/sub","Output":"=== RUN   TestNestedSuccess/d/sub\n"}
+{"Time":"2018-03-22T17:17:12.238285591Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess","Output":"--- PASS: TestNestedSuccess (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238289926Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a","Output":"    --- PASS: TestNestedSuccess/a (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238294331Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a/sub","Output":"        --- PASS: TestNestedSuccess/a/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238298293Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238302006Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/a","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238305434Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b","Output":"    --- PASS: TestNestedSuccess/b (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238309365Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b/sub","Output":"        --- PASS: TestNestedSuccess/b/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238316007Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238319652Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/b","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238323338Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c","Output":"    --- PASS: TestNestedSuccess/c (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238327426Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c/sub","Output":"        --- PASS: TestNestedSuccess/c/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238331395Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238334723Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/c","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238338173Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d","Output":"    --- PASS: TestNestedSuccess/d (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238343483Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d/sub","Output":"        --- PASS: TestNestedSuccess/d/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238347386Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.2383509Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess/d","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238354333Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestNestedSuccess","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238358001Z","Action":"cont","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst"}
+{"Time":"2018-03-22T17:17:12.238361258Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst","Output":"=== CONT  TestParallelTheFirst\n"}
+{"Time":"2018-03-22T17:17:12.238364973Z","Action":"cont","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird"}
+{"Time":"2018-03-22T17:17:12.238368283Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird","Output":"=== CONT  TestParallelTheThird\n"}
+{"Time":"2018-03-22T17:17:12.238372036Z","Action":"cont","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond"}
+{"Time":"2018-03-22T17:17:12.238375399Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond","Output":"=== CONT  TestParallelTheSecond\n"}
+{"Time":"2018-03-22T17:17:12.238379407Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird","Output":"--- PASS: TestParallelTheThird (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.238383425Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheThird","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.238386827Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond","Output":"--- PASS: TestParallelTheSecond (0.01s)\n"}
+{"Time":"2018-03-22T17:17:12.238390713Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheSecond","Elapsed":0.01}
+{"Time":"2018-03-22T17:17:12.238397682Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst","Output":"--- PASS: TestParallelTheFirst (0.01s)\n"}
+{"Time":"2018-03-22T17:17:12.23840162Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Test":"TestParallelTheFirst","Elapsed":0.01}
+{"Time":"2018-03-22T17:17:12.238405269Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Output":"PASS\n"}
+{"Time":"2018-03-22T17:17:12.238409105Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Output":"ok  \tgithub.com/gotestyourself/gotestyourself/testjson/internal/good\t(cached)\n"}
+{"Time":"2018-03-22T17:17:12.238415625Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/good","Elapsed":0.001}
+{"Time":"2018-03-22T17:17:12.385578625Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassed"}
+{"Time":"2018-03-22T17:17:12.385607852Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassed","Output":"=== RUN   TestPassed\n"}
+{"Time":"2018-03-22T17:17:12.385623841Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassed","Output":"--- PASS: TestPassed (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385632754Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassed","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385641691Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithLog"}
+{"Time":"2018-03-22T17:17:12.385648743Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithLog","Output":"=== RUN   TestPassedWithLog\n"}
+{"Time":"2018-03-22T17:17:12.385657445Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithLog","Output":"--- PASS: TestPassedWithLog (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385665771Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithLog","Output":"\tstub_test.go:18: this is a log\n"}
+{"Time":"2018-03-22T17:17:12.38567308Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithLog","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385682323Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithStdout"}
+{"Time":"2018-03-22T17:17:12.38568849Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithStdout","Output":"=== RUN   TestPassedWithStdout\n"}
+{"Time":"2018-03-22T17:17:12.385696142Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithStdout","Output":"this is a Print\n"}
+{"Time":"2018-03-22T17:17:12.385704248Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithStdout","Output":"--- PASS: TestPassedWithStdout (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385713745Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestPassedWithStdout","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385722424Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkipped"}
+{"Time":"2018-03-22T17:17:12.385729374Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkipped","Output":"=== RUN   TestSkipped\n"}
+{"Time":"2018-03-22T17:17:12.385736898Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkipped","Output":"--- SKIP: TestSkipped (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385752776Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkipped","Output":"\tstub_test.go:26: \n"}
+{"Time":"2018-03-22T17:17:12.385760912Z","Action":"skip","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkipped","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385767193Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkippedWitLog"}
+{"Time":"2018-03-22T17:17:12.385773623Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkippedWitLog","Output":"=== RUN   TestSkippedWitLog\n"}
+{"Time":"2018-03-22T17:17:12.38578347Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkippedWitLog","Output":"--- SKIP: TestSkippedWitLog (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385790379Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkippedWitLog","Output":"\tstub_test.go:30: the skip message\n"}
+{"Time":"2018-03-22T17:17:12.385797436Z","Action":"skip","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestSkippedWitLog","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385803754Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailed"}
+{"Time":"2018-03-22T17:17:12.385809614Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailed","Output":"=== RUN   TestFailed\n"}
+{"Time":"2018-03-22T17:17:12.385819377Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailed","Output":"--- FAIL: TestFailed (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385826849Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailed","Output":"\tstub_test.go:34: this failed\n"}
+{"Time":"2018-03-22T17:17:12.385833782Z","Action":"fail","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailed","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385840089Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestWithStderr"}
+{"Time":"2018-03-22T17:17:12.385846127Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestWithStderr","Output":"=== RUN   TestWithStderr\n"}
+{"Time":"2018-03-22T17:17:12.385853152Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestWithStderr","Output":"this is stderr\n"}
+{"Time":"2018-03-22T17:17:12.385863096Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestWithStderr","Output":"--- PASS: TestWithStderr (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385873525Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestWithStderr","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385880167Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailedWithStderr"}
+{"Time":"2018-03-22T17:17:12.385886531Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailedWithStderr","Output":"=== RUN   TestFailedWithStderr\n"}
+{"Time":"2018-03-22T17:17:12.385893242Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailedWithStderr","Output":"this is stderr\n"}
+{"Time":"2018-03-22T17:17:12.385901485Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailedWithStderr","Output":"--- FAIL: TestFailedWithStderr (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.385913754Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailedWithStderr","Output":"\tstub_test.go:43: also failed\n"}
+{"Time":"2018-03-22T17:17:12.385922082Z","Action":"fail","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestFailedWithStderr","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.385929918Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheFirst"}
+{"Time":"2018-03-22T17:17:12.385936235Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheFirst","Output":"=== RUN   TestParallelTheFirst\n"}
+{"Time":"2018-03-22T17:17:12.38594471Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheFirst","Output":"=== PAUSE TestParallelTheFirst\n"}
+{"Time":"2018-03-22T17:17:12.385951474Z","Action":"pause","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheFirst"}
+{"Time":"2018-03-22T17:17:12.385961316Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheSecond"}
+{"Time":"2018-03-22T17:17:12.385967754Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheSecond","Output":"=== RUN   TestParallelTheSecond\n"}
+{"Time":"2018-03-22T17:17:12.385974934Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheSecond","Output":"=== PAUSE TestParallelTheSecond\n"}
+{"Time":"2018-03-22T17:17:12.385981405Z","Action":"pause","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheSecond"}
+{"Time":"2018-03-22T17:17:12.385988135Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheThird"}
+{"Time":"2018-03-22T17:17:12.385994261Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheThird","Output":"=== RUN   TestParallelTheThird\n"}
+{"Time":"2018-03-22T17:17:12.386003293Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheThird","Output":"=== PAUSE TestParallelTheThird\n"}
+{"Time":"2018-03-22T17:17:12.386010866Z","Action":"pause","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestParallelTheThird"}
+{"Time":"2018-03-22T17:17:12.386018153Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure"}
+{"Time":"2018-03-22T17:17:12.38602535Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure","Output":"=== RUN   TestNestedWithFailure\n"}
+{"Time":"2018-03-22T17:17:12.386032345Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a"}
+{"Time":"2018-03-22T17:17:12.38603942Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a","Output":"=== RUN   TestNestedWithFailure/a\n"}
+{"Time":"2018-03-22T17:17:12.386046805Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a/sub"}
+{"Time":"2018-03-22T17:17:12.386052581Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a/sub","Output":"=== RUN   TestNestedWithFailure/a/sub\n"}
+{"Time":"2018-03-22T17:17:12.386057195Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b"}
+{"Time":"2018-03-22T17:17:12.386060568Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b","Output":"=== RUN   TestNestedWithFailure/b\n"}
+{"Time":"2018-03-22T17:17:12.386067514Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b/sub"}
+{"Time":"2018-03-22T17:17:12.386071071Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b/sub","Output":"=== RUN   TestNestedWithFailure/b/sub\n"}
+{"Time":"2018-03-22T17:17:12.386074849Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/c"}
+{"Time":"2018-03-22T17:17:12.386078109Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/c","Output":"=== RUN   TestNestedWithFailure/c\n"}
+{"Time":"2018-03-22T17:17:12.386084213Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d"}
+{"Time":"2018-03-22T17:17:12.386089799Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d","Output":"=== RUN   TestNestedWithFailure/d\n"}
+{"Time":"2018-03-22T17:17:12.386093783Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d/sub"}
+{"Time":"2018-03-22T17:17:12.386097155Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d/sub","Output":"=== RUN   TestNestedWithFailure/d/sub\n"}
+{"Time":"2018-03-22T17:17:12.386101455Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure","Output":"--- FAIL: TestNestedWithFailure (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386105727Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a","Output":"    --- PASS: TestNestedWithFailure/a (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386110153Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a/sub","Output":"        --- PASS: TestNestedWithFailure/a/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386114105Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386117763Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/a","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386122462Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b","Output":"    --- PASS: TestNestedWithFailure/b (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386126304Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b/sub","Output":"        --- PASS: TestNestedWithFailure/b/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386130104Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386134285Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/b","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.3861378Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/c","Output":"    --- FAIL: TestNestedWithFailure/c (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386141361Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/c","Output":"    \tstub_test.go:65: failed\n"}
+{"Time":"2018-03-22T17:17:12.386145205Z","Action":"fail","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/c","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386150449Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d","Output":"    --- PASS: TestNestedWithFailure/d (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386154713Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d/sub","Output":"        --- PASS: TestNestedWithFailure/d/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386158561Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386161944Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure/d","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386165106Z","Action":"fail","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedWithFailure","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386168283Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess"}
+{"Time":"2018-03-22T17:17:12.386171495Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess","Output":"=== RUN   TestNestedSuccess\n"}
+{"Time":"2018-03-22T17:17:12.386176538Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a"}
+{"Time":"2018-03-22T17:17:12.386179922Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a","Output":"=== RUN   TestNestedSuccess/a\n"}
+{"Time":"2018-03-22T17:17:12.386183608Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a/sub"}
+{"Time":"2018-03-22T17:17:12.386188269Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a/sub","Output":"=== RUN   TestNestedSuccess/a/sub\n"}
+{"Time":"2018-03-22T17:17:12.386192109Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b"}
+{"Time":"2018-03-22T17:17:12.38619546Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b","Output":"=== RUN   TestNestedSuccess/b\n"}
+{"Time":"2018-03-22T17:17:12.386199434Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b/sub"}
+{"Time":"2018-03-22T17:17:12.38620399Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b/sub","Output":"=== RUN   TestNestedSuccess/b/sub\n"}
+{"Time":"2018-03-22T17:17:12.38620765Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c"}
+{"Time":"2018-03-22T17:17:12.386210933Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c","Output":"=== RUN   TestNestedSuccess/c\n"}
+{"Time":"2018-03-22T17:17:12.38621454Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c/sub"}
+{"Time":"2018-03-22T17:17:12.386219466Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c/sub","Output":"=== RUN   TestNestedSuccess/c/sub\n"}
+{"Time":"2018-03-22T17:17:12.386223273Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d"}
+{"Time":"2018-03-22T17:17:12.386226532Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d","Output":"=== RUN   TestNestedSuccess/d\n"}
+{"Time":"2018-03-22T17:17:12.386230162Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d/sub"}
+{"Time":"2018-03-22T17:17:12.386237124Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d/sub","Output":"=== RUN   TestNestedSuccess/d/sub\n"}
+{"Time":"2018-03-22T17:17:12.386242904Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess","Output":"--- PASS: TestNestedSuccess (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386247072Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a","Output":"    --- PASS: TestNestedSuccess/a (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386250901Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a/sub","Output":"        --- PASS: TestNestedSuccess/a/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386254682Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386257995Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/a","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386261384Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b","Output":"    --- PASS: TestNestedSuccess/b (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386265323Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b/sub","Output":"        --- PASS: TestNestedSuccess/b/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386269107Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386272847Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/b","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386276224Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c","Output":"    --- PASS: TestNestedSuccess/c (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386280028Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c/sub","Output":"        --- PASS: TestNestedSuccess/c/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.3862838Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386287193Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/c","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.38629055Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d","Output":"    --- PASS: TestNestedSuccess/d (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386294479Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d/sub","Output":"        --- PASS: TestNestedSuccess/d/sub (0.00s)\n"}
+{"Time":"2018-03-22T17:17:12.386298929Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d/sub","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386302332Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess/d","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386305489Z","Action":"pass","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestNestedSuccess","Elapsed":0}
+{"Time":"2018-03-22T17:17:12.386309949Z","Action":"run","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout"}
+{"Time":"2018-03-22T17:17:12.386313293Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"=== RUN   TestTimeout\n"}
+{"Time":"2018-03-22T17:17:12.397846403Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"panic: test timed out after 10ms\n"}
+{"Time":"2018-03-22T17:17:12.39786511Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\n"}
+{"Time":"2018-03-22T17:17:12.397870238Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"goroutine 48 [running]:\n"}
+{"Time":"2018-03-22T17:17:12.397874336Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.(*M).startAlarm.func1()\n"}
+{"Time":"2018-03-22T17:17:12.397878158Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:1240 +0xfc\n"}
+{"Time":"2018-03-22T17:17:12.397881883Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"created by time.goFunc\n"}
+{"Time":"2018-03-22T17:17:12.397888019Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/time/sleep.go:172 +0x44\n"}
+{"Time":"2018-03-22T17:17:12.397891723Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\n"}
+{"Time":"2018-03-22T17:17:12.397895339Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"goroutine 1 [chan receive]:\n"}
+{"Time":"2018-03-22T17:17:12.397902844Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.(*T).Run(0xc4200c5b30, 0x530c14, 0xb, 0x5388a8, 0x466d01)\n"}
+{"Time":"2018-03-22T17:17:12.397907345Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:825 +0x301\n"}
+{"Time":"2018-03-22T17:17:12.397911075Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.runTests.func1(0xc4200c4000)\n"}
+{"Time":"2018-03-22T17:17:12.397914649Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:1063 +0x64\n"}
+{"Time":"2018-03-22T17:17:12.397919398Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.tRunner(0xc4200c4000, 0xc420051df8)\n"}
+{"Time":"2018-03-22T17:17:12.397922917Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:777 +0xd0\n"}
+{"Time":"2018-03-22T17:17:12.397926427Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.runTests(0xc4200a0020, 0x5db580, 0xe, 0xe, 0x40ef79)\n"}
+{"Time":"2018-03-22T17:17:12.397930144Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:1061 +0x2c4\n"}
+{"Time":"2018-03-22T17:17:12.397933692Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.(*M).Run(0xc4200c0000, 0x0)\n"}
+{"Time":"2018-03-22T17:17:12.397937493Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:978 +0x171\n"}
+{"Time":"2018-03-22T17:17:12.397944957Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"main.main()\n"}
+{"Time":"2018-03-22T17:17:12.397948838Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t_testmain.go:68 +0x151\n"}
+{"Time":"2018-03-22T17:17:12.397952287Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\n"}
+{"Time":"2018-03-22T17:17:12.397955779Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"goroutine 27 [chan receive]:\n"}
+{"Time":"2018-03-22T17:17:12.397959345Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.(*T).Parallel(0xc4200c4870)\n"}
+{"Time":"2018-03-22T17:17:12.397963269Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:697 +0x205\n"}
+{"Time":"2018-03-22T17:17:12.397966873Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"github.com/gotestyourself/gotestyourself/testjson/internal/stub.TestParallelTheFirst(0xc4200c4870)\n"}
+{"Time":"2018-03-22T17:17:12.397970535Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/go/src/github.com/gotestyourself/gotestyourself/testjson/internal/stub/stub_test.go:47 +0x2b\n"}
+{"Time":"2018-03-22T17:17:12.397976776Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.tRunner(0xc4200c4870, 0x538868)\n"}
+{"Time":"2018-03-22T17:17:12.397982721Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:777 +0xd0\n"}
+{"Time":"2018-03-22T17:17:12.397988411Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"created by testing.(*T).Run\n"}
+{"Time":"2018-03-22T17:17:12.397993489Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:824 +0x2e0\n"}
+{"Time":"2018-03-22T17:17:12.398002149Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\n"}
+{"Time":"2018-03-22T17:17:12.398008821Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"goroutine 28 [chan receive]:\n"}
+{"Time":"2018-03-22T17:17:12.398012497Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.(*T).Parallel(0xc4200c4960)\n"}
+{"Time":"2018-03-22T17:17:12.398018094Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:697 +0x205\n"}
+{"Time":"2018-03-22T17:17:12.398021772Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"github.com/gotestyourself/gotestyourself/testjson/internal/stub.TestParallelTheSecond(0xc4200c4960)\n"}
+{"Time":"2018-03-22T17:17:12.398025324Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/go/src/github.com/gotestyourself/gotestyourself/testjson/internal/stub/stub_test.go:52 +0x2b\n"}
+{"Time":"2018-03-22T17:17:12.39802901Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.tRunner(0xc4200c4960, 0x538870)\n"}
+{"Time":"2018-03-22T17:17:12.398036106Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:777 +0xd0\n"}
+{"Time":"2018-03-22T17:17:12.398042118Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"created by testing.(*T).Run\n"}
+{"Time":"2018-03-22T17:17:12.398047492Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:824 +0x2e0\n"}
+{"Time":"2018-03-22T17:17:12.398053867Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\n"}
+{"Time":"2018-03-22T17:17:12.398059917Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"goroutine 29 [chan receive]:\n"}
+{"Time":"2018-03-22T17:17:12.398066129Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.(*T).Parallel(0xc4200c4a50)\n"}
+{"Time":"2018-03-22T17:17:12.398072429Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:697 +0x205\n"}
+{"Time":"2018-03-22T17:17:12.398079331Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"github.com/gotestyourself/gotestyourself/testjson/internal/stub.TestParallelTheThird(0xc4200c4a50)\n"}
+{"Time":"2018-03-22T17:17:12.398085799Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/go/src/github.com/gotestyourself/gotestyourself/testjson/internal/stub/stub_test.go:57 +0x2b\n"}
+{"Time":"2018-03-22T17:17:12.398092623Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.tRunner(0xc4200c4a50, 0x538878)\n"}
+{"Time":"2018-03-22T17:17:12.398099318Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:777 +0xd0\n"}
+{"Time":"2018-03-22T17:17:12.398105375Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"created by testing.(*T).Run\n"}
+{"Time":"2018-03-22T17:17:12.398111093Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:824 +0x2e0\n"}
+{"Time":"2018-03-22T17:17:12.398116546Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\n"}
+{"Time":"2018-03-22T17:17:12.398122419Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"goroutine 47 [sleep]:\n"}
+{"Time":"2018-03-22T17:17:12.398127733Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"time.Sleep(0xdf8475800)\n"}
+{"Time":"2018-03-22T17:17:12.398131351Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/runtime/time.go:102 +0x166\n"}
+{"Time":"2018-03-22T17:17:12.398136659Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"github.com/gotestyourself/gotestyourself/testjson/internal/stub.TestTimeout(0xc4200c5b30)\n"}
+{"Time":"2018-03-22T17:17:12.39814153Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/go/src/github.com/gotestyourself/gotestyourself/testjson/internal/stub/timeout_test.go:11 +0x30\n"}
+{"Time":"2018-03-22T17:17:12.398147914Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"testing.tRunner(0xc4200c5b30, 0x5388a8)\n"}
+{"Time":"2018-03-22T17:17:12.398151802Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:777 +0xd0\n"}
+{"Time":"2018-03-22T17:17:12.398156634Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"created by testing.(*T).Run\n"}
+{"Time":"2018-03-22T17:17:12.398160156Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"\t/usr/local/go/src/testing/testing.go:824 +0x2e0\n"}
+{"Time":"2018-03-22T17:17:12.398188877Z","Action":"output","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Output":"FAIL\tgithub.com/gotestyourself/gotestyourself/testjson/internal/stub\t0.013s\n"}
+{"Time":"2018-03-22T17:17:12.398201812Z","Action":"fail","Package":"github.com/gotestyourself/gotestyourself/testjson/internal/stub","Test":"TestTimeout","Elapsed":0.017}

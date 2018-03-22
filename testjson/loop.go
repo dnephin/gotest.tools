@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/jonboulle/clockwork"
@@ -140,6 +141,10 @@ func (e *Execution) Total() int {
 }
 
 func (e *Execution) addError(err string) {
+	// Build errors start with a header
+	if strings.HasPrefix(err, "# ") {
+		return
+	}
 	// TODO: may need locking, or use a channel
 	e.errors = append(e.errors, err)
 }
