@@ -79,6 +79,10 @@ var expectedExecution = &Execution{
 	packages: map[string]*Package{
 		"github.com/gotestyourself/gotestyourself/testjson/internal/good": {
 			run: 18,
+			skipped: []testCase{
+				{Test: "TestSkipped"},
+				{Test: "TestSkippedWitLog"},
+			},
 		},
 		"github.com/gotestyourself/gotestyourself/testjson/internal/stub": {
 			run: 28,
@@ -87,6 +91,10 @@ var expectedExecution = &Execution{
 				{Test: "TestFailedWithStderr"},
 				{Test: "TestNestedWithFailure/c"},
 				{Test: "TestNestedWithFailure"},
+			},
+			skipped: []testCase{
+				{Test: "TestSkipped"},
+				{Test: "TestSkippedWitLog"},
 			},
 		},
 	},
@@ -170,11 +178,11 @@ func TestPrintExecutionWithFailures(t *testing.T) {
 					"TestFileDo": multiLine(`=== RUN   TestFileDo
 Some stdout/stderr here
 --- FAIL: TestFailDo (1.41s)
-    do_test.go:33 assertion failed
+	do_test.go:33 assertion failed
 `),
 					"TestFileDoError": multiLine(`=== RUN   TestFileDoError
 --- FAIL: TestFailDoError (0.01s)
-    do_test.go:50 assertion failed: expected nil error, got WHAT!
+	do_test.go:50 assertion failed: expected nil error, got WHAT!
 `),
 				},
 			},
@@ -187,9 +195,20 @@ Some stdout/stderr here
 						Elapsed: 40 * time.Millisecond,
 					},
 				},
+				skipped: []testCase{
+					{
+						Package: "example.com/project/pkg/more",
+						Test:    "TestOnlySometimes",
+						Elapsed: 0,
+					},
+				},
 				output: map[string][]string{
 					"TestAlbatross": multiLine(`=== RUN   TestAlbatross
 --- FAIL: TestAlbatross (0.04s)
+`),
+					"TestOnlySometimes": multiLine(`=== RUN   TestOnlySometimes
+--- SKIP: TestOnlySometimes (0.00s)
+	good_test.go:27: the skip message
 `),
 				},
 			},
@@ -202,17 +221,21 @@ Some stdout/stderr here
 	err := PrintExecution(out, exec)
 	assert.NilError(t, err)
 
-	// TODO: add skipped
 	expected := `
-DONE 13 tests, 3 failures, 1 error in 34.123s
+DONE 13 tests, 1 skipped, 3 failures, 1 error in 34.123s
+
+=== Skipped
+=== SKIP: project/pkg/more TestOnlySometimes (0.00s)
+	good_test.go:27: the skip message
+
 
 === Failures
 === FAIL: project/fs TestFileDo (1.41s)
 Some stdout/stderr here
-    do_test.go:33 assertion failed
+	do_test.go:33 assertion failed
 
 === FAIL: project/fs TestFileDoError (0.01s)
-    do_test.go:50 assertion failed: expected nil error, got WHAT!
+	do_test.go:50 assertion failed: expected nil error, got WHAT!
 
 === FAIL: project/pkg/more TestAlbatross (0.04s)
 

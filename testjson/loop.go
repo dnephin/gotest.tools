@@ -54,9 +54,9 @@ func (e TestEvent) ElapsedFormatted() string {
 
 // Package is the set of TestEvents for a single go package
 type Package struct {
-	run    int
-	failed []testCase
-	//skipped []TestEvent
+	run     int
+	failed  []testCase
+	skipped []testCase
 	//passed []time.Duration
 	output map[string][]string
 }
@@ -78,7 +78,6 @@ type Execution struct {
 	errors   []string
 }
 
-// TODO: detect skipped tests
 func (e *Execution) add(event TestEvent) {
 	pkg, ok := e.packages[event.Package]
 	if !ok {
@@ -100,7 +99,14 @@ func (e *Execution) add(event TestEvent) {
 			Test:    event.Test,
 			Elapsed: elapsedDuration(event),
 		})
+	case ActionSkip:
+		pkg.skipped = append(pkg.skipped, testCase{
+			Package: event.Package,
+			Test:    event.Test,
+			Elapsed: elapsedDuration(event),
+		})
 	case ActionOutput, ActionBench:
+		// TODO: only store output for failed and skipped tests
 		// TODO: limit size of buffered test output
 		pkg.output[event.Test] = append(pkg.output[event.Test], event.Output)
 	}
@@ -125,7 +131,6 @@ func (e *Execution) Elapsed() time.Duration {
 	return clock.Now().Sub(e.started)
 }
 
-// TODO: return test name and package name
 func (e *Execution) Failed() []testCase {
 	var failed []testCase
 	for _, pkg := range sortedKeys(e.packages) {
@@ -141,6 +146,14 @@ func sortedKeys(pkgs map[string]*Package) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+func (e *Execution) Skipped() []testCase {
+	var skipped []testCase
+	for _, pkg := range sortedKeys(e.packages) {
+		skipped = append(skipped, e.packages[pkg].skipped...)
+	}
+	return skipped
 }
 
 func (e *Execution) Total() int {

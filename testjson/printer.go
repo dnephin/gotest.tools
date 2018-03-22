@@ -38,7 +38,6 @@ func standardQuietFormat(event TestEvent, _ *Execution) (string, error) {
 
 func shortVerboseFormat(event TestEvent, exec *Execution) (string, error) {
 	switch {
-	// TODO: include elapsed time in package events?
 	case event.Action == ActionSkip && event.PackageEvent():
 		return "EMPTY " + relativePackagePath(event.Package) + "\n", nil
 	case event.Action == ActionPass && event.PackageEvent():
@@ -95,7 +94,6 @@ func isPackageEndEvent(event TestEvent) bool {
 	return strings.HasPrefix(event.Output, "ok ") || strings.HasPrefix(event.Output, "? ")
 }
 
-// TODO: show skipped
 func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 	pkg := exec.Package(event)
 
@@ -108,27 +106,23 @@ func dotsFormat(event TestEvent, exec *Execution) (string, error) {
 		return "·", nil
 	case event.Action == ActionFail:
 		return "✖", nil
-		// skip: ↷
+	case event.Action == ActionSkip:
+		return "↷", nil
 	}
 	return "", nil
 }
 
-// TODO: show skipped
 func PrintExecution(out io.Writer, execution *Execution) error {
-	failed := execution.Failed()
 	errors := execution.Errors()
-	fmt.Fprintf(out, "\nDONE %d tests%s%s in %s\n",
+	fmt.Fprintf(out, "\nDONE %d tests%s%s%s in %s\n",
 		execution.Total(),
-		formatTestCount(len(failed), "failure"),
-		formatTestCount(len(errors), "error"),
+		formatTestCount(len(execution.Skipped()), "skipped", ""),
+		formatTestCount(len(execution.Failed()), "failure", "s"),
+		formatTestCount(len(errors), "error", "s"),
 		formatDurationAsSeconds(execution.Elapsed(), 3))
 
-	if len(failed) > 0 {
-		fmt.Fprintln(out, "\n=== Failures")
-	}
-	for _, failure := range failed {
-		writeFailureSummary(out, failure, execution.Output(failure.Package, failure.Test))
-	}
+	writeTestCaseSummary(out, execution, formatSkipped)
+	writeTestCaseSummary(out, execution, formatFailures)
 
 	if len(errors) > 0 {
 		fmt.Fprintln(out, "\n=== Errors")
@@ -140,13 +134,13 @@ func PrintExecution(out io.Writer, execution *Execution) error {
 	return nil
 }
 
-func formatTestCount(count int, category string) string {
+func formatTestCount(count int, category string, pluralize string) string {
 	switch count {
 	case 0:
 		return ""
 	case 1:
 	default:
-		category += "s"
+		category += pluralize
 	}
 	return fmt.Sprintf(", %d %s", count, category)
 }
@@ -155,22 +149,59 @@ func formatDurationAsSeconds(d time.Duration, precision int) string {
 	return fmt.Sprintf("%.[2]*[1]fs", float64(d.Nanoseconds()/1000000)/1000, precision)
 }
 
-func writeFailureSummary(out io.Writer, tc testCase, failure []string) {
-	fmt.Fprintf(out, "=== FAIL: %s %s (%s)\n",
-		relativePackagePath(tc.Package),
-		tc.Test,
-		formatDurationAsSeconds(tc.Elapsed, 2))
-	for _, line := range failure[1:] {
-		if isFailLine(line) {
-			continue
-		}
-		fmt.Fprint(out, line)
+func writeTestCaseSummary(out io.Writer, execution *Execution, conf testCaseFormatConfig) {
+	testCases := conf.getter(execution)
+	if len(testCases) == 0 {
+		return
 	}
-	fmt.Fprintln(out)
+	fmt.Fprintln(out, "\n"+conf.header)
+	for _, tc := range testCases {
+		fmt.Fprintf(out, "%s %s %s (%s)\n",
+			conf.prefix,
+			relativePackagePath(tc.Package),
+			tc.Test,
+			formatDurationAsSeconds(tc.Elapsed, 2))
+		for _, line := range execution.Output(tc.Package, tc.Test) {
+			if isRunLine(line) || conf.filter(line) {
+				continue
+			}
+			fmt.Fprint(out, line)
+		}
+		fmt.Fprintln(out)
+	}
 }
 
-func isFailLine(line string) bool {
-	return strings.HasPrefix(line, "--- FAIL: Test")
+type testCaseFormatConfig struct {
+	header string
+	prefix string
+	filter func(string) bool
+	getter func(*Execution) []testCase
+}
+
+var formatFailures = testCaseFormatConfig{
+	header: "=== Failures",
+	prefix: "=== FAIL:",
+	filter: func(line string) bool {
+		return strings.HasPrefix(line, "--- FAIL: Test")
+	},
+	getter: func(execution *Execution) []testCase {
+		return execution.Failed()
+	},
+}
+
+var formatSkipped = testCaseFormatConfig{
+	header: "=== Skipped",
+	prefix: "=== SKIP:",
+	filter: func(line string) bool {
+		return strings.HasPrefix(line, "--- SKIP: Test")
+	},
+	getter: func(execution *Execution) []testCase {
+		return execution.Skipped()
+	},
+}
+
+func isRunLine(line string) bool {
+	return strings.HasPrefix(line, "=== RUN   Test")
 }
 
 func relativePackagePath(pkgpath string) string {
