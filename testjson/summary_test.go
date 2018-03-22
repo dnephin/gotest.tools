@@ -91,6 +91,12 @@ Some stdout/stderr here
 `),
 				},
 			},
+			"example.com/project/badmain": {
+				action: ActionFail,
+				output: map[string][]string{
+					"": {"sometimes main can exit 2\n"},
+				},
+			},
 		},
 		errors: []string{
 			"pkg/file.go:99:12: missing ',' before newline",
@@ -101,7 +107,7 @@ Some stdout/stderr here
 	assert.NilError(t, err)
 
 	expected := `
-DONE 13 tests, 1 skipped, 3 failures, 1 error in 34.123s
+DONE 13 tests, 1 skipped, 4 failures, 1 error in 34.123s
 
 === Skipped
 === SKIP: project/pkg/more TestOnlySometimes (0.00s)
@@ -109,6 +115,9 @@ DONE 13 tests, 1 skipped, 3 failures, 1 error in 34.123s
 
 
 === Failures
+=== FAIL: project/badmain  (0.00s)
+sometimes main can exit 2
+
 === FAIL: project/fs TestFileDo (1.41s)
 Some stdout/stderr here
 	do_test.go:33 assertion failed

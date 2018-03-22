@@ -18,6 +18,7 @@ func debugFormat(event TestEvent, _ *Execution) (string, error) {
 		event.Output), nil
 }
 
+// TODO: test case
 // go test -v
 func standardVerboseFormat(event TestEvent, _ *Execution) (string, error) {
 	if event.Action == ActionOutput && !event.PackageEvent() {
@@ -26,6 +27,7 @@ func standardVerboseFormat(event TestEvent, _ *Execution) (string, error) {
 	return "", nil
 }
 
+// TODO: test case
 // go test
 func standardQuietFormat(event TestEvent, _ *Execution) (string, error) {
 	if isPackageEndEvent(event) {
@@ -36,6 +38,8 @@ func standardQuietFormat(event TestEvent, _ *Execution) (string, error) {
 
 func shortVerboseFormat(event TestEvent, exec *Execution) (string, error) {
 	switch {
+	case isPkgFailureOutput(event):
+		return event.Output, nil
 	case event.Action == ActionSkip && event.PackageEvent():
 		return "EMPTY " + relativePackagePath(event.Package) + "\n", nil
 	case event.Action == ActionPass && event.PackageEvent():
@@ -59,6 +63,28 @@ func shortVerboseFormat(event TestEvent, exec *Execution) (string, error) {
 	return "", nil
 }
 
+func isPkgFailureOutput(event TestEvent) bool {
+	out := event.Output
+	return all(
+		event.PackageEvent(),
+		event.Action == ActionOutput,
+		out != "PASS\n",
+		out != "FAIL\n",
+		!strings.HasPrefix(out, "FAIL\t"+event.Package),
+		!strings.HasPrefix(out, "ok  \t"+event.Package),
+	)
+}
+
+func all(cond ...bool) bool {
+	for _, c := range cond {
+		if !c {
+			return false
+		}
+	}
+	return true
+}
+
+// TODO: test case
 func shortFormat(event TestEvent, _ *Execution) (string, error) {
 	if !event.PackageEvent() {
 		return "", nil

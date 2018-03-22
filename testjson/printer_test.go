@@ -81,6 +81,7 @@ var expectedExecution = &Execution{
 				{Test: "TestSkipped"},
 				{Test: "TestSkippedWitLog"},
 			},
+			action: ActionPass,
 		},
 		"github.com/gotestyourself/gotestyourself/testjson/internal/stub": {
 			run: 28,
@@ -94,6 +95,10 @@ var expectedExecution = &Execution{
 				{Test: "TestSkipped"},
 				{Test: "TestSkippedWitLog"},
 			},
+			action: ActionFail,
+		},
+		"github.com/gotestyourself/gotestyourself/testjson/internal/badmain": {
+			action: ActionFail,
 		},
 	},
 }

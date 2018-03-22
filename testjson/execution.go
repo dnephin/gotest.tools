@@ -59,6 +59,9 @@ type Package struct {
 	skipped []TestCase
 	//passed []time.Duration
 	output map[string][]string
+	// action identifies if the package passed or failed. A package may fail
+	// with no test failures if an init() or TestMain exits non-zero.
+	action Action
 }
 
 // TestCase stores the name and elapsed time for a test case.
@@ -86,14 +89,18 @@ func (e *Execution) add(event TestEvent) {
 		e.packages[event.Package] = pkg
 	}
 	if event.PackageEvent() {
+		switch event.Action {
+		case ActionPass, ActionFail:
+			pkg.action = event.Action
+		case ActionOutput:
+			pkg.output[""] = append(pkg.output[""], event.Output)
+		}
 		return
 	}
 
 	switch event.Action {
 	case ActionRun:
 		pkg.run++
-	case ActionPass:
-		//pkg.passed = append(pkg.passed, testDuration(event))
 	case ActionFail:
 		pkg.failed = append(pkg.failed, TestCase{
 			Package: event.Package,
@@ -107,9 +114,11 @@ func (e *Execution) add(event TestEvent) {
 			Elapsed: elapsedDuration(event),
 		})
 	case ActionOutput, ActionBench:
-		// TODO: only store output for failed and skipped tests
 		// TODO: limit size of buffered test output
 		pkg.output[event.Test] = append(pkg.output[event.Test], event.Output)
+	case ActionPass:
+		// Remove test output once a test passes, it wont be used
+		pkg.output[event.Test] = nil
 	}
 }
 
@@ -137,8 +146,12 @@ func (e *Execution) Elapsed() time.Duration {
 // Failed returns a list of all the failed test cases.
 func (e *Execution) Failed() []TestCase {
 	var failed []TestCase
-	for _, pkg := range sortedKeys(e.packages) {
-		failed = append(failed, e.packages[pkg].failed...)
+	for _, name := range sortedKeys(e.packages) {
+		pkg := e.packages[name]
+		if pkg.action == ActionFail {
+			failed = append(failed, TestCase{Package: name})
+		}
+		failed = append(failed, pkg.failed...)
 	}
 	return failed
 }

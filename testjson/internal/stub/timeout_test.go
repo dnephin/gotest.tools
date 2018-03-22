@@ -1,4 +1,4 @@
-// +build stubpkg,timeoutstub
+// +build stubpkg,timeout
 
 package stub
 

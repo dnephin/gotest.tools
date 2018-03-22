@@ -152,5 +152,9 @@ func startGoTest(ctx context.Context, args []string, debug bool) (proc, error) {
 	if err != nil {
 		return p, err
 	}
-	return p, p.cmd.Start()
+	err = p.cmd.Start()
+	if err == nil && debug {
+		log.Printf("go test pid: %d", p.cmd.Process.Pid)
+	}
+	return p, err
 }

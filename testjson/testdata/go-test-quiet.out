@@ -1,3 +1,5 @@
+sometimes main can exit 2
+FAIL	github.com/gotestyourself/gotestyourself/testjson/internal/badmain	0.000s
 ok  	github.com/gotestyourself/gotestyourself/testjson/internal/good	(cached)
 this is a Print
 --- FAIL: TestFailed (0.00s)

@@ -17,12 +17,12 @@ go test -p 1 -json -tags stubpkg ./internal/... \
     2> testdata/go-test-json.err \
     | true
 
-go test -p 1 -json -timeout 10ms -tags 'stubpkg timeoutstub' ./internal/... \
+go test -p 1 -json -timeout 10ms -tags 'stubpkg timeout' ./internal/... \
     > testdata/go-test-json-with-timeout.out \
     2> testdata/go-test-json-with-timeout.err \
     | true
 
-go test -p 1 -json -tags 'stubpkg panicstub' ./internal/... \
+go test -p 1 -json -tags 'stubpkg panic' ./internal/... \
     > testdata/go-test-json-with-panic.out \
     2> testdata/go-test-json-with-panic.err \
     | true

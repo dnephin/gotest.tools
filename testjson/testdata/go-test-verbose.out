@@ -1,3 +1,5 @@
+sometimes main can exit 2
+FAIL	github.com/gotestyourself/gotestyourself/testjson/internal/badmain	0.001s
 === RUN   TestPassed
 --- PASS: TestPassed (0.00s)
 === RUN   TestPassedWithLog
