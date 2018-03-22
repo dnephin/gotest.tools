@@ -82,7 +82,7 @@ var expectedExecution = &Execution{
 		},
 		"github.com/gotestyourself/gotestyourself/testjson/internal/stub": {
 			run: 28,
-			failed: []TestEvent{
+			failed: []testCase{
 				{Test: "TestFailed"},
 				{Test: "TestFailedWithStderr"},
 				{Test: "TestNestedWithFailure/c"},
@@ -100,7 +100,7 @@ var cmpExecutionShallow = gocmp.Options{
 
 var cmpPackageShallow = gocmp.Options{
 	gocmp.FilterPath(opt.PathField(Package{}, "output"), gocmp.Ignore()),
-	gocmp.Comparer(func(x, y TestEvent) bool {
+	gocmp.Comparer(func(x, y testCase) bool {
 		return x.Test == y.Test
 	}),
 }
@@ -154,18 +154,16 @@ func TestPrintExecutionWithFailures(t *testing.T) {
 		packages: map[string]*Package{
 			"example.com/project/fs": {
 				run: 12,
-				failed: []TestEvent{
+				failed: []testCase{
 					{
 						Package: "example.com/project/fs",
 						Test:    "TestFileDo",
-						Output:  "something",
-						Elapsed: 1.4111,
+						Elapsed: 1411 * time.Millisecond,
 					},
 					{
 						Package: "example.com/project/fs",
 						Test:    "TestFileDoError",
-						Output:  "something",
-						Elapsed: 0.012,
+						Elapsed: 12 * time.Millisecond,
 					},
 				},
 				output: map[string][]string{
@@ -182,12 +180,11 @@ Some stdout/stderr here
 			},
 			"example.com/project/pkg/more": {
 				run: 1,
-				failed: []TestEvent{
+				failed: []testCase{
 					{
 						Package: "example.com/project/pkg/more",
 						Test:    "TestAlbatross",
-						Output:  "something",
-						Elapsed: 0.04,
+						Elapsed: 40 * time.Millisecond,
 					},
 				},
 				output: map[string][]string{

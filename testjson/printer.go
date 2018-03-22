@@ -53,7 +53,7 @@ func shortVerboseFormat(event TestEvent, exec *Execution) (string, error) {
 		), nil
 	case event.Action == ActionFail:
 		return fmt.Sprintf("%s--- FAIL %s %s %s\n",
-			strings.Join(exec.Output(event), ""),
+			strings.Join(exec.Output(event.Package, event.Test), ""),
 			relativePackagePath(event.Package),
 			event.Test,
 			event.ElapsedFormatted(),
@@ -127,7 +127,7 @@ func PrintExecution(out io.Writer, execution *Execution) error {
 		fmt.Fprintln(out, "\n=== Failures")
 	}
 	for _, failure := range failed {
-		writeFailureSummary(out, failure, execution.Output(failure))
+		writeFailureSummary(out, failure, execution.Output(failure.Package, failure.Test))
 	}
 
 	if len(errors) > 0 {
@@ -155,9 +155,11 @@ func formatDurationAsSeconds(d time.Duration, precision int) string {
 	return fmt.Sprintf("%.[2]*[1]fs", float64(d.Nanoseconds()/1000000)/1000, precision)
 }
 
-func writeFailureSummary(out io.Writer, event TestEvent, failure []string) {
-	fmt.Fprintf(out, "=== FAIL: %s %s %s\n",
-		relativePackagePath(event.Package), event.Test, event.ElapsedFormatted())
+func writeFailureSummary(out io.Writer, tc testCase, failure []string) {
+	fmt.Fprintf(out, "=== FAIL: %s %s (%s)\n",
+		relativePackagePath(tc.Package),
+		tc.Test,
+		formatDurationAsSeconds(tc.Elapsed, 2))
 	for _, line := range failure[1:] {
 		if isFailLine(line) {
 			continue

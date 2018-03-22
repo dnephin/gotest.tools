@@ -54,18 +54,21 @@ func (e TestEvent) ElapsedFormatted() string {
 
 // Package is the set of TestEvents for a single go package
 type Package struct {
-	run int
-	// TODO: only store test name, and elapsed for failed
-	failed []TestEvent
+	run    int
+	failed []testCase
 	//skipped []TestEvent
 	//passed []time.Duration
 	output map[string][]string
 }
 
+type testCase struct {
+	Package string
+	Test    string
+	Elapsed time.Duration
+}
+
 func newPackage() *Package {
-	return &Package{
-		output: make(map[string][]string),
-	}
+	return &Package{output: make(map[string][]string)}
 }
 
 // Execution of one or more test packages
@@ -92,7 +95,11 @@ func (e *Execution) add(event TestEvent) {
 	case ActionPass:
 		//pkg.passed = append(pkg.passed, testDuration(event))
 	case ActionFail:
-		pkg.failed = append(pkg.failed, event)
+		pkg.failed = append(pkg.failed, testCase{
+			Package: event.Package,
+			Test:    event.Test,
+			Elapsed: elapsedDuration(event),
+		})
 	case ActionOutput, ActionBench:
 		// TODO: limit size of buffered test output
 		pkg.output[event.Test] = append(pkg.output[event.Test], event.Output)
@@ -104,8 +111,8 @@ func elapsedDuration(event TestEvent) time.Duration {
 }
 
 // Output returns the full test output for a test.
-func (e *Execution) Output(event TestEvent) []string {
-	return e.packages[event.Package].output[event.Test]
+func (e *Execution) Output(pkg, test string) []string {
+	return e.packages[pkg].output[test]
 }
 
 func (e *Execution) Package(event TestEvent) *Package {
@@ -119,8 +126,8 @@ func (e *Execution) Elapsed() time.Duration {
 }
 
 // TODO: return test name and package name
-func (e *Execution) Failed() []TestEvent {
-	var failed []TestEvent
+func (e *Execution) Failed() []testCase {
+	var failed []testCase
 	for _, pkg := range sortedKeys(e.packages) {
 		failed = append(failed, e.packages[pkg].failed...)
 	}
