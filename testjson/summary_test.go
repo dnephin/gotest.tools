@@ -63,7 +63,9 @@ Some stdout/stderr here
 --- FAIL: TestFailDoError (0.01s)
 	do_test.go:50 assertion failed: expected nil error, got WHAT!
 `),
+					"": {"FAIL\n"},
 				},
+				action: ActionFail,
 			},
 			"example.com/project/pkg/more": {
 				run: 1,

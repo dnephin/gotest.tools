@@ -148,10 +148,13 @@ func (e *Execution) Failed() []TestCase {
 	var failed []TestCase
 	for _, name := range sortedKeys(e.packages) {
 		pkg := e.packages[name]
-		if pkg.action == ActionFail {
+
+		// Add package-level failure output if there were no failed tests.
+		if pkg.action == ActionFail && len(pkg.failed) == 0 {
 			failed = append(failed, TestCase{Package: name})
+		} else {
+			failed = append(failed, pkg.failed...)
 		}
-		failed = append(failed, pkg.failed...)
 	}
 	return failed
 }

@@ -18,19 +18,17 @@ func debugFormat(event TestEvent, _ *Execution) (string, error) {
 		event.Output), nil
 }
 
-// TODO: test case
 // go test -v
 func standardVerboseFormat(event TestEvent, _ *Execution) (string, error) {
-	if event.Action == ActionOutput && !event.PackageEvent() {
+	if event.Action == ActionOutput {
 		return event.Output, nil
 	}
 	return "", nil
 }
 
-// TODO: test case
 // go test
-func standardQuietFormat(event TestEvent, _ *Execution) (string, error) {
-	if isPackageEndEvent(event) {
+func standardQuietFormat(event TestEvent, exec *Execution) (string, error) {
+	if event.PackageEvent() && event.Output != "PASS\n" {
 		return event.Output, nil
 	}
 	return "", nil
@@ -84,7 +82,6 @@ func all(cond ...bool) bool {
 	return true
 }
 
-// TODO: test case
 func shortFormat(event TestEvent, _ *Execution) (string, error) {
 	if !event.PackageEvent() {
 		return "", nil
@@ -109,13 +106,6 @@ func shortFormat(event TestEvent, _ *Execution) (string, error) {
 		return fmtEvent("✖")
 	}
 	return "", nil
-}
-
-func isPackageEndEvent(event TestEvent) bool {
-	if event.Action != ActionOutput || !event.PackageEvent() {
-		return false
-	}
-	return strings.HasPrefix(event.Output, "ok ") || strings.HasPrefix(event.Output, "? ")
 }
 
 func dotsFormat(event TestEvent, exec *Execution) (string, error) {

@@ -133,3 +133,39 @@ func TestScanTestOutputWithDotsFormat(t *testing.T) {
 	golden.Assert(t, shim.Err.String(), "dots-format.err")
 	assert.DeepEqual(t, exec, expectedExecution, cmpExecutionShallow)
 }
+
+func TestScanTestOutputWithShortFormat(t *testing.T) {
+	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
+
+	shim := newConfigShim(shortFormat, "go-test-json")
+	exec, err := ScanTestOutput(shim.Config(t))
+
+	assert.NilError(t, err)
+	golden.Assert(t, shim.Out.String(), "short-format.out")
+	golden.Assert(t, shim.Err.String(), "short-format.err")
+	assert.DeepEqual(t, exec, expectedExecution, cmpExecutionShallow)
+}
+
+func TestScanTestOutputWithStandardVerboseFormat(t *testing.T) {
+	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
+
+	shim := newConfigShim(standardVerboseFormat, "go-test-json")
+	exec, err := ScanTestOutput(shim.Config(t))
+
+	assert.NilError(t, err)
+	golden.Assert(t, shim.Out.String(), "go-test-verbose.out")
+	golden.Assert(t, shim.Err.String(), "go-test-verbose.err")
+	assert.DeepEqual(t, exec, expectedExecution, cmpExecutionShallow)
+}
+
+func TestScanTestOutputWithStandardQuietFormat(t *testing.T) {
+	defer patchPkgPathPrefix("github.com/gotestyourself/gotestyourself")()
+
+	shim := newConfigShim(standardQuietFormat, "go-test-json")
+	exec, err := ScanTestOutput(shim.Config(t))
+
+	assert.NilError(t, err)
+	golden.Assert(t, shim.Out.String(), "standard-quiet-format.out")
+	golden.Assert(t, shim.Err.String(), "standard-quiet-format.err")
+	assert.DeepEqual(t, exec, expectedExecution, cmpExecutionShallow)
+}
