@@ -61,11 +61,19 @@ func exactBytes(in []byte) []byte {
 // If the `-test.update-golden` flag is set then the actual content is written
 // to the golden file.
 // Returns whether the assertion was successful (true) or not (false).
-// This is equivalent to assert.Check(t, String(actual, filename))
+// This is equivalent to assert.Assert(t, String(actual, filename))
 func Assert(t assert.TestingT, actual string, filename string, msgAndArgs ...interface{}) {
 	if ht, ok := t.(helperT); ok {
 		ht.Helper()
 	}
+	assert.Assert(t, String(actual, filename), msgAndArgs...)
+}
+
+func ExpectedForTest(t assert.TestingT, actual string, msgAndArgs ...interface{}) {
+	if ht, ok := t.(helperT); ok {
+		ht.Helper()
+	}
+	filename := format.CleanTestNameForFilesystem(t.Name())
 	assert.Assert(t, String(actual, filename), msgAndArgs...)
 }
 
@@ -99,7 +107,7 @@ func String(actual string, filename string) cmp.Comparison {
 // file. If the `-test.update-golden` flag is set then the actual content is
 // written to the golden file.
 // Returns whether the assertion was successful (true) or not (false).
-// This is equivalent to assert.Check(t, Bytes(actual, filename))
+// This is equivalent to assert.Assert(t, Bytes(actual, filename))
 func AssertBytes(
 	t assert.TestingT,
 	actual []byte,

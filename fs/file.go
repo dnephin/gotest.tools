@@ -7,11 +7,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 
 	"gotest.tools/assert"
 	"gotest.tools/x/subtest"
+	"gotest.tools/internal/format"
 )
 
 // Path objects return their filesystem path. Path may be implemented by a
@@ -53,13 +52,7 @@ func NewFile(t assert.TestingT, prefix string, ops ...PathOp) *File {
 	return file
 }
 
-func cleanPrefix(prefix string) string {
-	// windows requires both / and \ are replaced
-	if runtime.GOOS == "windows" {
-		prefix = strings.Replace(prefix, string(os.PathSeparator), "-", -1)
-	}
-	return strings.Replace(prefix, "/", "-", -1)
-}
+var cleanPrefix = format.CleanTestNameForFilesystem
 
 // Path returns the full path to the file
 func (f *File) Path() string {

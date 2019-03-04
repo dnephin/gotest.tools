@@ -1,6 +1,11 @@
 package format // import "gotest.tools/internal/format"
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+	"runtime"
+	"strings"
+)
 
 // Message accepts a msgAndArgs varargs and formats it using fmt.Sprintf
 func Message(msgAndArgs ...interface{}) string {
@@ -24,4 +29,14 @@ func WithCustomMessage(source string, msgAndArgs ...interface{}) string {
 		return custom
 	}
 	return fmt.Sprintf("%s: %s", source, custom)
+}
+
+// CleanTestNameForFilesystem converts path separators to dashes so that
+// t.Name() can be used as a filename.
+func CleanTestNameForFilesystem(name string) string {
+	// windows requires both / and \ are replaced
+	if runtime.GOOS == "windows" {
+		name = strings.Replace(name, string(os.PathSeparator), "-", -1)
+	}
+	return strings.Replace(name, "/", "-", -1)
 }
