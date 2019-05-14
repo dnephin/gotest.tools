@@ -3,15 +3,15 @@ package fs_test
 import (
 	"io/ioutil"
 	"os"
-	"testing"
 
 	"gotest.tools/assert"
 	"gotest.tools/assert/cmp"
 	"gotest.tools/fs"
 	"gotest.tools/golden"
+	"gotest.tools/internal/examplet"
 )
 
-var t = &testing.T{}
+var t = examplet.T
 
 // Create a temporary directory which contains a single file
 func ExampleNewDir() {
@@ -20,7 +20,7 @@ func ExampleNewDir() {
 
 	files, err := ioutil.ReadDir(dir.Path())
 	assert.NilError(t, err)
-	assert.Assert(t, cmp.Len(files, 0))
+	assert.Assert(t, cmp.Len(files, 1))
 }
 
 // Create a new file with some content
@@ -48,6 +48,7 @@ func ExampleWithDir() {
 func ExampleEqual() {
 	path := operationWhichCreatesFiles()
 	expected := fs.Expected(t,
+		fs.WithMode(0700),
 		fs.WithFile("one", "",
 			fs.WithBytes(golden.Get(t, "one.golden")),
 			fs.WithMode(0600)),
@@ -55,10 +56,19 @@ func ExampleEqual() {
 			fs.WithFile("config", "", fs.MatchAnyFileContent)))
 
 	assert.Assert(t, fs.Equal(path, expected))
+	// Output:
+	// assertion failed: directory testdata/example-expected does not match expected:
+	// /
+	//  mode: expected drwx------ got drwxr-xr-x
+	//  one: expected file to exist
+	//  extra: unexpected file
+	// /data
+	//  config: expected file to exist
+	//  .config: unexpected file
 }
 
 func operationWhichCreatesFiles() string {
-	return "example-path"
+	return "testdata/example-expected"
 }
 
 // Add a file to an existing directory

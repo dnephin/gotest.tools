@@ -43,7 +43,7 @@ type failure struct {
 type problem string
 
 func notEqual(property string, x, y interface{}) problem {
-	return problem(fmt.Sprintf("%s: expected %s got %s", property, x, y))
+	return problem(fmt.Sprintf("%s: expected %v got %v", property, x, y))
 }
 
 func errProblem(reason string, err error) problem {
