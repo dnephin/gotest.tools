@@ -271,6 +271,7 @@ func WaitOnCmd(timeout time.Duration, result *Result) *Result {
 	// Wait for command to exit in a goroutine
 	go func() {
 		done <- result.Cmd.Wait()
+		close(done)
 	}()
 
 	select {
