@@ -14,6 +14,13 @@ import (
 // Comparison is a function which compares values and returns ResultSuccess if
 // the actual value matches the expected value. If the values do not match the
 // Result will contain a message about why it failed.
+//
+// Many comparisons may be wrapped to provide a more specific comparison.
+// If a function wraps a Comparison it must ensure that it either has the same
+// number of arguments as the function which returned the Comparison, or it
+// must modify the return 'FailureMessage(args []ast.Expr) string' method on
+// the Result. Otherwise the template returned by this method must be modified
+// to account for the difference in args. See assert/cmp.ResultFailureTemplate.
 type Comparison func() Result
 
 // DeepEqual compares two values using google/go-cmp
